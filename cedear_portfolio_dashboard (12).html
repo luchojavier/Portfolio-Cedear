@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0e1520; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; }
+  .root { padding: 20px 22px 32px; max-width: 1400px; margin: 0 auto; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 12px; }
+  .header-left h1 { font-size: 21px; font-weight: 800; color: #f1f5f9; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+  .header-badge { font-size: 11px; background: rgba(99,102,241,0.15); color: #818cf8; padding: 2px 9px; border-radius: 20px; border: 1px solid rgba(99,102,241,0.25); font-weight: 600; white-space: nowrap; }
+  .header-sub { font-size: 12px; color: #64748b; margin-top: 4px; }
+  .header-sub.live { color: #22c55e; }
+  .btn { border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: #6366f1; color: #fff; }
+  .btn-ghost { background: #1e293b; border: 1px solid #334155; color: #94a3b8; font-weight: 400; }
+  .btn-success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; font-weight: 400; }
+  .btn-sm { padding: 6px 11px; font-size: 12px; }
+  .hbtns { display: flex; gap: 8px; flex-shrink: 0; }
+  .panel { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  .panel h3 { font-size: 14px; font-weight: 700; color: #60a5fa; margin-bottom: 8px; }
+  .panel p { font-size: 13px; color: #94a3b8; line-height: 1.7; margin-bottom: 12px; }
+  .panel p strong { color: #cbd5e1; }
+  .panel p em { color: #93c5fd; font-style: normal; font-weight: 600; }
+  .url-row { display: flex; gap: 8px; }
+  .url-input { flex: 1; background: #0d1a2e; border: 1px solid #1e3a5f; border-radius: 8px; padding: 10px 13px; color: #e2e8f0; font-size: 13px; outline: none; }
+  .url-input::placeholder { color: #475569; }
+  .error-box { margin-top: 10px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 10px 13px; font-size: 13px; color: #f87171; }
+  .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 18px; }
+  .card { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; padding: 15px 16px; }
+  .card-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; margin-bottom: 7px; }
+  .card-val { font-size: 19px; font-weight: 800; line-height: 1.1; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
+  .card-val.neutral { color: #e2e8f0; }
+  .card-val.neg { color: #f87171; }
+  .card-val.pos { color: #34d399; }
+  .card-sub { font-size: 11px; color: #475569; }
+  .table-wrap { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
+  .table-head { padding: 13px 18px; border-bottom: 1px solid #1e3a5f; display: flex; justify-content: space-between; align-items: center; }
+  .table-head span { font-size: 13px; font-weight: 700; color: #e2e8f0; }
+  .table-head small { font-size: 11px; color: #475569; }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: #0e1520; }
+  thead th { padding: 9px 12px; text-align: right; font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; cursor: pointer; user-select: none; transition: color 0.15s; }
+  thead th:hover { color: #818cf8; }
+  thead th.left { text-align: left; }
+  tbody tr { border-top: 1px solid #1a2d3e; transition: background 0.1s; }
+  tbody tr:hover { background: #1a2d45 !important; }
+  tbody tr.even { background: transparent; }
+  tbody tr.odd { background: #162540; }
+  td { padding: 10px 12px; text-align: right; vertical-align: middle; }
+  td.left { text-align: left; }
+  td.dimmed { color: #64748b; }
+  td.bright { color: #e2e8f0; font-weight: 600; }
+  td.pos { color: #34d399; font-weight: 700; }
+  td.neg { color: #f87171; font-weight: 700; }
+  .sym { display: inline-block; border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; color: #fff; white-space: nowrap; }
+  .pct-badge { display: inline-block; padding: 3px 7px; border-radius: 5px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .pct-badge.pos { background: rgba(52,211,153,0.12); color: #34d399; }
+  .pct-badge.neg { background: rgba(248,113,113,0.12); color: #f87171; }
+  .bottom { display: grid; grid-template-columns: 240px 1fr; gap: 14px; }
+  .chart-box { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; padding: 16px; }
+  .chart-box h4 { font-size: 13px; font-weight: 700; color: #e2e8f0; margin-bottom: 10px; }
+  .donut-svg { display: block; margin: 0 auto; }
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 10px; margin-top: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #64748b; }
+  .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .legend-pct { margin-left: auto; color: #475569; }
+  .rankings { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .rank-box { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; padding: 16px; }
+  .rank-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .rank-box h4.green { color: #34d399; }
+  .rank-box h4.red { color: #f87171; }
+  .rank-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1a2d3e; }
+  .rank-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .rank-amt { font-size: 11px; color: #475569; }
+  .dist-cell { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+  .dist-bar { height: 3px; border-radius: 2px; min-width: 3px; }
+</style>
+</head>
+<body>
+<div class="root">
+  <div class="header">
+    <div class="header-left">
+      <h1>📈 Portfolio CEDEAR <span class="header-badge" id="pos-count">— posiciones</span></h1>
+      <div class="header-sub" id="status-line">⟳ Cargando…</div>
+    </div>
+    <div class="hbtns">
+      <button class="btn btn-ghost btn-sm" onclick="doRefresh()">↻ Refresh</button>
+      <button class="btn btn-success" onclick="togglePanel()">🔗 Sheets on</button>
+    </div>
+  </div>
+
+  <div class="panel" id="connect-panel" style="display:none">
+    <h3>🔗 Cambiar URL de Google Sheets</h3>
+    <p>Pegá la URL de publicación CSV de tu hoja <em>"lista de seguimiento"</em>:</p>
+    <div class="url-row">
+      <input class="url-input" id="url-input" type="text" placeholder="https://docs.google.com/spreadsheets/d/.../pub?gid=...&single=true&output=csv"/>
+      <button class="btn btn-primary" onclick="handleConnect()">Conectar</button>
+      <button class="btn btn-ghost" onclick="togglePanel()">Cancelar</button>
+    </div>
+    <div class="error-box" id="error-box" style="display:none"></div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="card-label">Capital invertido</div><div class="card-val neutral" id="c-invertido">—</div><div class="card-sub">costo base total ARS</div></div>
+    <div class="card"><div class="card-label">Saldo actual</div><div class="card-val neutral" id="c-saldo">—</div><div class="card-sub">valuación hoy en pesos</div></div>
+    <div class="card"><div class="card-label">Resultado</div><div class="card-val" id="c-resultado">—</div><div class="card-sub">ganancia / pérdida</div></div>
+    <div class="card"><div class="card-label">Rendimiento</div><div class="card-val" id="c-rend">—</div><div class="card-sub">performance acumulado</div></div>
+    <div class="card"><div class="card-label">Valuación USD</div><div class="card-val neutral" id="c-usd">—</div><div class="card-sub">saldo en dólares</div></div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-head"><span>Posiciones</span><small>Clic en columna para ordenar</small></div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr>
+          <th class="left" onclick="sortBy('symbol')">Ticker</th>
+          <th class="left" style="min-width:180px">Activo</th>
+          <th onclick="sortBy('cedears')">Cant.</th>
+          <th onclick="sortBy('precioCedear')">$ actual</th>
+          <th onclick="sortBy('precioCompra')">$ compra</th>
+          <th onclick="sortBy('saldoActual')">Saldo ARS</th>
+          <th onclick="sortBy('montoCompra')">Costo ARS</th>
+          <th onclick="sortBy('winLoss')">G/P ARS</th>
+          <th onclick="sortBy('pct')">G/P %</th>
+          <th onclick="sortBy('saldoUSD')">USD</th>
+          <th onclick="sortBy('dist')">Dist.</th>
+        </tr></thead>
+        <tbody id="pos-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="chart-box">
+      <h4>Distribución</h4>
+      <svg class="donut-svg" id="donut-svg" width="200" height="160" viewBox="0 0 200 160"></svg>
+      <div class="legend" id="donut-legend"></div>
+    </div>
+    <div class="rankings">
+      <div class="rank-box"><h4 class="green">🏆 Top performers</h4><div id="rank-top"></div></div>
+      <div class="rank-box"><h4 class="red">💀 Underperformers</h4><div id="rank-bot"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnhIdGSvBx1r-vkd2nYEIxMhTe8tHMviejnBr4_fj0sN9Y9j-AfSQclYN5UaS7eaVzVAgN6tXIaQJ5/pub?gid=1233054202&single=true&output=csv';
+const COLORS = ["#6366f1","#8b5cf6","#22d3ee","#3b82f6","#10b981","#f59e0b","#ef4444","#ec4899","#84cc16","#f97316","#a78bfa"];
+
+let positions = [], summary = {}, sortKey = 'saldoActual', sortDir = -1;
+let currentUrl = DEFAULT_URL, lastUpdate = null, colorMap = {};
+
+// ── Número argentino: limpia $ spaces - y convierte puntos/comas ──────────
+function parseNum(s) {
+  if (!s) return 0;
+  s = String(s).trim();
+  s = s.replace(/[$`"]/g, '').trim();
+  s = s.replace(/^-\s+/, '-');
+  if (/\d\.\d{3}(,|\.|$)/.test(s) || /,\d{1,2}$/.test(s)) {
+    s = s.replace(/\./g, '').replace(',', '.');
+  } else {
+    s = s.replace(/,/g, '');
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+// ── Porcentaje: el CSV ya trae "+0,03%" o "-6,78%" → devuelve 0.03 o -6.78
+function parsePct(s) {
+  if (!s) return 0;
+  s = String(s).replace(/[$`"%\s"]/g, '').trim();
+  s = s.replace(/^-\s+/, '-');
+  // formato argentino con coma decimal
+  if (/,\d{1,2}$/.test(s)) s = s.replace(',', '.');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+// ── CSV parser respetando comillas ────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  // detectar separador
+  const firstLine = lines[0];
+  const commas = (firstLine.match(/,/g)||[]).length;
+  const semis  = (firstLine.match(/;/g)||[]).length;
+  const sep = semis > commas ? ';' : ',';
+
+  return lines.map(line => {
+    const cells = []; let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === sep && !inQ) { cells.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+    cells.push(cur.trim());
+    return cells;
+  });
+}
+
+// ── Proxies con fallback ──────────────────────────────────────────────────
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfdEiUw-GsiEZoC4nLafd745zxCyRJVbxDxqoZeN8nkUPtHu-jFmDw2ThDnZEFhNof/exec';
+
+async function fetchCSV(url) {
+  const res = await fetch(APPS_SCRIPT_URL, { signal: AbortSignal.timeout(15000) });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const txt = await res.text();
+  if (!txt || txt.length < 20) throw new Error('Respuesta vacía del servidor');
+  return txt;
+}
+
+// ── Fetch + parse principal ───────────────────────────────────────────────
+async function fetchLive(url) {
+  setStatus('loading');
+  document.getElementById('error-box').style.display = 'none';
+  try {
+    const raw = await fetchCSV(url);
+    const rows = parseCSV(raw);
+
+    // ── 1. Leer resumen de las primeras filas ─────────────────────────────
+    let sumInv = 0, sumSaldo = 0, sumRes = 0, sumRend = 0, sumUSD = 0;
+    rows.forEach(r => {
+      const lbl = (r[0]||'').trim().toLowerCase();
+      // columna C (índice 2) tiene el valor
+      if (/^invertido/.test(lbl))       sumInv   = parseNum(r[2]);
+      if (/^saldo\s*pesos/.test(lbl))   sumSaldo  = parseNum(r[2]);
+      if (/^resultado/.test(lbl))       sumRes    = parseNum(r[2]);
+      if (/^rendimiento/.test(lbl))     sumRend   = parsePct(r[2]);
+      if (/^saldo\s*usd/.test(lbl))     sumUSD    = parseNum(r[2]);
+    });
+
+    // ── 2. Encontrar fila header ──────────────────────────────────────────
+    const hi = rows.findIndex(r => r.some(c => /s[íi]mbolo|symbol/i.test(c)));
+    if (hi < 0) throw new Error('No se encontró columna "Símbolo". Verificá que publicaste la hoja "lista de seguimiento".');
+
+    const hdr = rows[hi];
+    // Mapeo EXACTO por nombre de columna (case-insensitive, sin regex complicado)
+    function colIdx(keywords) {
+      return hdr.findIndex(h => keywords.some(k => h.toLowerCase().includes(k.toLowerCase())));
+    }
+
+    const iSym    = colIdx(['símbolo','simbolo','symbol']);
+    const iAct    = colIdx(['activo','nombre','name']);
+    const iCed    = colIdx(['cedears','cant.','cantidad']);
+    const iPC     = colIdx(['precio cedear','precio actual']);
+    const iPCom   = colIdx(['precio compra']);
+    const iSaldo  = colIdx(['saldo actual','valor actual']);
+    const iMonto  = colIdx(['monto compra','costo']);
+    const iWL     = colIdx(['win/loss','win loss','ganancia','resultado']);      // Win/Loss (ARS)
+    const iPct    = colIdx(['win/loss %','win loss %','%','rendimiento']);       // Win/Loss %
+    const iRatio  = colIdx(['ratio']);
+    const iUSD    = colIdx(['saldo usd','usd']);
+    const iDist   = colIdx(['distribucion','distribución','dist']);
+
+    // ── 3. Parsear filas de datos ─────────────────────────────────────────
+    const dataRows = rows.slice(hi + 1).filter(r => {
+      const sym = (r[iSym] || '').trim();
+      return sym.length >= 2 && sym.length <= 6 && /^[A-Za-z]/.test(sym);
+    });
+
+    if (dataRows.length < 1) throw new Error('No se encontraron posiciones. Revisá la hoja publicada.');
+
+    const get = (r, i) => (i >= 0 && i < r.length) ? (r[i] || '') : '';
+
+    const newPos = dataRows.map((r, idx) => {
+      const symbol       = get(r, iSym).trim();
+      const activo       = get(r, iAct).trim();
+      const cedears      = parseNum(get(r, iCed));
+      const precioCedear = parseNum(get(r, iPC));
+      const precioCompra = parseNum(get(r, iPCom));
+      const saldoActual  = parseNum(get(r, iSaldo));
+      const montoCompra  = parseNum(get(r, iMonto));
+      const winLoss      = parseNum(get(r, iWL));
+      const pctVal       = parsePct(get(r, iPct));
+      const ratio        = parseNum(get(r, iRatio)) || 1;
+      const saldoUSD     = parseNum(get(r, iUSD));
+      const dist         = parsePct(get(r, iDist));
+      return { symbol, activo, cedears, precioCedear, precioCompra, saldoActual, montoCompra, winLoss, pct: pctVal, ratio, saldoUSD, dist };
+    });
+
+    // Recalc dist si no vino del CSV
+    const totalPesos = newPos.reduce((s, p) => s + p.saldoActual, 0);
+    newPos.forEach(p => { if (!p.dist && totalPesos) p.dist = (p.saldoActual / totalPesos) * 100; });
+
+    // Fijar colores una sola vez
+    if (!Object.keys(colorMap).length) newPos.forEach((p, i) => colorMap[p.symbol] = i);
+
+    positions = newPos;
+    const totalInv = newPos.reduce((s, p) => s + p.montoCompra, 0);
+    summary = {
+      invertido:   sumInv   || totalInv,
+      saldoPesos:  sumSaldo  || totalPesos,
+      resultado:   sumRes    || (totalPesos - totalInv),
+      rendimiento: sumRend   || (totalInv ? (totalPesos - totalInv) / totalInv * 100 : 0),
+      saldoUSD:    sumUSD    || newPos.reduce((s, p) => s + p.saldoUSD, 0)
+    };
+    lastUpdate = new Date();
+    setStatus('live');
+    render();
+  } catch(e) {
+    document.getElementById('error-box').style.display = '';
+    document.getElementById('error-box').textContent = '❌ ' + e.message;
+    setStatus('error');
+  }
+}
+
+// ── Status ────────────────────────────────────────────────────────────────
+function setStatus(s) {
+  const el = document.getElementById('status-line');
+  el.style.color = '';
+  if (s === 'loading') { el.className = 'header-sub'; el.textContent = '⟳ Cargando datos live…'; }
+  else if (s === 'live') { el.className = 'header-sub live'; el.textContent = `🟢 Live · ${lastUpdate.toLocaleTimeString('es-AR')} · auto-refresh c/5 min`; }
+  else if (s === 'error') { el.className = 'header-sub'; el.style.color = '#f87171'; el.textContent = '🔴 Error al cargar'; }
+}
+
+function doRefresh() { colorMap = {}; fetchLive(currentUrl); }
+
+// ── Sort ──────────────────────────────────────────────────────────────────
+function sortBy(k) { if (sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=-1; } renderTable(); }
+function getSorted() {
+  return [...positions].sort((a, b) => {
+    const av = a[sortKey], bv = b[sortKey];
+    return typeof av === 'number' ? (av - bv) * sortDir : String(av).localeCompare(String(bv)) * sortDir;
+  });
+}
+
+// ── Formatters ────────────────────────────────────────────────────────────
+function fARS(n, sign=false) {
+  if (n == null || isNaN(n)) return '–';
+  const s = n < 0 ? '-' : (sign && n > 0 ? '+' : '');
+  return s + '$\u202F' + Math.round(Math.abs(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+function fUSD(n) {
+  if (!n) return '–';
+  return '$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fPct(n, sign=true) {
+  if (n == null || isNaN(n)) return '–';
+  return (sign && n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+}
+function pctBadge(n) { return `<span class="pct-badge ${n>=0?'pos':'neg'}">${fPct(n)}</span>`; }
+function symBadge(sym) {
+  const ci = colorMap[sym] !== undefined ? colorMap[sym] : 0;
+  return `<span class="sym" style="background:${COLORS[ci % COLORS.length]}">${sym}</span>`;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+function renderCards() {
+  const s = summary;
+  document.getElementById('c-invertido').textContent = fARS(s.invertido);
+  document.getElementById('c-saldo').textContent = fARS(s.saldoPesos);
+  const rEl = document.getElementById('c-resultado');
+  rEl.textContent = fARS(s.resultado, true);
+  rEl.className = 'card-val ' + (s.resultado >= 0 ? 'pos' : 'neg');
+  const rnEl = document.getElementById('c-rend');
+  rnEl.textContent = fPct(s.rendimiento);
+  rnEl.className = 'card-val ' + (s.rendimiento >= 0 ? 'pos' : 'neg');
+  document.getElementById('c-usd').textContent = fUSD(s.saldoUSD);
+}
+
+function renderTable() {
+  const sorted = getSorted();
+  document.getElementById('pos-tbody').innerHTML = sorted.map((p, i) => {
+    const ci = colorMap[p.symbol] !== undefined ? colorMap[p.symbol] : i;
+    const barW = Math.max(3, Math.round(p.dist * 1.4));
+    const wl = p.winLoss >= 0 ? 'pos' : 'neg';
+    return `<tr class="${i%2===0?'even':'odd'}">
+      <td class="left">${symBadge(p.symbol)}</td>
+      <td class="left" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#94a3b8" title="${p.activo}">${p.activo}</td>
+      <td class="dimmed">${p.cedears}</td>
+      <td style="color:#cbd5e1;font-weight:500">${fARS(p.precioCedear)}</td>
+      <td class="dimmed">${fARS(p.precioCompra)}</td>
+      <td class="bright">${fARS(p.saldoActual)}</td>
+      <td class="dimmed">${fARS(p.montoCompra)}</td>
+      <td class="${wl}">${p.winLoss>=0?'+':''}${fARS(p.winLoss)}</td>
+      <td>${pctBadge(p.pct)}</td>
+      <td style="color:#94a3b8">${fUSD(p.saldoUSD)}</td>
+      <td><div class="dist-cell">
+        <div class="dist-bar" style="width:${barW}px;background:${COLORS[ci%COLORS.length]}"></div>
+        <span style="color:#64748b;font-size:11px">${p.dist.toFixed(1)}%</span>
+      </div></td>
+    </tr>`;
+  }).join('');
+  const wins = positions.filter(p => p.pct > 0).length;
+  const loss = positions.filter(p => p.pct < 0).length;
+  document.getElementById('pos-count').textContent = `${positions.length} posiciones · ${wins}▲ ${loss}▼`;
+}
+
+function renderDonut() {
+  const sorted = getSorted();
+  const cx=100, cy=82, R=68, r=42;
+  let angle = -Math.PI/2, paths = '';
+  sorted.forEach((p, i) => {
+    const ci = colorMap[p.symbol] !== undefined ? colorMap[p.symbol] : i;
+    const color = COLORS[ci % COLORS.length];
+    const slice = (p.dist / 100) * 2 * Math.PI;
+    const x1=cx+R*Math.cos(angle), y1=cy+R*Math.sin(angle);
+    const x2=cx+R*Math.cos(angle+slice), y2=cy+R*Math.sin(angle+slice);
+    const xi1=cx+r*Math.cos(angle), yi1=cy+r*Math.sin(angle);
+    const xi2=cx+r*Math.cos(angle+slice), yi2=cy+r*Math.sin(angle+slice);
+    const lg = slice > Math.PI ? 1 : 0;
+    paths += `<path d="M${x1},${y1} A${R},${R} 0 ${lg} 1 ${x2},${y2} L${xi2},${yi2} A${r},${r} 0 ${lg} 0 ${xi1},${yi1} Z" fill="${color}" stroke="#0e1520" stroke-width="1.5" opacity="0.9"/>`;
+    angle += slice;
+  });
+  document.getElementById('donut-svg').innerHTML = paths;
+  document.getElementById('donut-legend').innerHTML = sorted.map((p, i) => {
+    const ci = colorMap[p.symbol] !== undefined ? colorMap[p.symbol] : i;
+    return `<div class="legend-item"><div class="legend-dot" style="background:${COLORS[ci%COLORS.length]}"></div><span>${p.symbol}</span><span class="legend-pct">${p.dist.toFixed(0)}%</span></div>`;
+  }).join('');
+}
+
+function renderRankings() {
+  const items = arr => arr.map(p => {
+    const wl = p.winLoss >= 0 ? 'pos' : 'neg';
+    return `<div class="rank-row">
+      <div style="display:flex;align-items:center;gap:8px;min-width:0">
+        ${symBadge(p.symbol)}
+        <span style="font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px" title="${p.activo}">${p.activo}</span>
+      </div>
+      <div class="rank-right">${pctBadge(p.pct)}<span class="rank-amt ${wl}">${p.winLoss>=0?'+':''}${fARS(p.winLoss)}</span></div>
+    </div>`;
+  }).join('');
+  document.getElementById('rank-top').innerHTML = items([...positions].sort((a,b)=>b.pct-a.pct).slice(0,5));
+  document.getElementById('rank-bot').innerHTML = items([...positions].sort((a,b)=>a.pct-b.pct).slice(0,5));
+}
+
+function render() { renderCards(); renderTable(); renderDonut(); renderRankings(); }
+
+// ── Panel ─────────────────────────────────────────────────────────────────
+let panelOpen = false;
+function togglePanel() {
+  panelOpen = !panelOpen;
+  document.getElementById('connect-panel').style.display = panelOpen ? '' : 'none';
+}
+async function handleConnect() {
+  const val = document.getElementById('url-input').value.trim();
+  if (!val) return;
+  currentUrl = val; colorMap = {};
+  togglePanel();
+  await fetchLive(val);
+  if (window._ar) clearInterval(window._ar);
+  window._ar = setInterval(() => fetchLive(currentUrl), 5*60*1000);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+fetchLive(DEFAULT_URL);
+window._ar = setInterval(() => fetchLive(currentUrl), 5*60*1000);
+</script>
+</body>
+</html>
