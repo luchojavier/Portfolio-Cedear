@@ -10,32 +10,54 @@
   .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 12px; }
   .header-left h1 { font-size: 21px; font-weight: 800; color: #f1f5f9; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
   .header-badge { font-size: 11px; background: rgba(99,102,241,0.15); color: #818cf8; padding: 2px 9px; border-radius: 20px; border: 1px solid rgba(99,102,241,0.25); font-weight: 600; white-space: nowrap; }
-  .header-sub { font-size: 12px; color: #64748b; margin-top: 4px; }
+  .header-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
   .header-sub.live { color: #22c55e; }
   .btn { border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: opacity 0.15s; }
   .btn:hover { opacity: 0.85; }
   .btn-primary { background: #6366f1; color: #fff; }
-  .btn-ghost { background: #1e293b; border: 1px solid #334155; color: #94a3b8; font-weight: 400; }
+  .btn-ghost { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; font-weight: 400; }
   .btn-success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; font-weight: 400; }
   .btn-sm { padding: 6px 11px; font-size: 12px; }
   .hbtns { display: flex; gap: 8px; flex-shrink: 0; }
   .panel { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
   .panel h3 { font-size: 14px; font-weight: 700; color: #60a5fa; margin-bottom: 8px; }
-  .panel p { font-size: 13px; color: #94a3b8; line-height: 1.7; margin-bottom: 12px; }
-  .panel p strong { color: #cbd5e1; }
+  .panel p { font-size: 13px; color: #cbd5e1; line-height: 1.7; margin-bottom: 12px; }
+  .panel p strong { color: #f1f5f9; }
   .panel p em { color: #93c5fd; font-style: normal; font-weight: 600; }
   .url-row { display: flex; gap: 8px; }
   .url-input { flex: 1; background: #0d1a2e; border: 1px solid #1e3a5f; border-radius: 8px; padding: 10px 13px; color: #e2e8f0; font-size: 13px; outline: none; }
-  .url-input::placeholder { color: #475569; }
+  .url-input::placeholder { color: #64748b; }
   .error-box { margin-top: 10px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 10px 13px; font-size: 13px; color: #f87171; }
-  .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 18px; }
+
+  /* ── Sección CEDEAR cards ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 8px; }
   .card { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; padding: 15px 16px; }
-  .card-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; margin-bottom: 7px; }
+  .card-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; margin-bottom: 7px; }
   .card-val { font-size: 19px; font-weight: 800; line-height: 1.1; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
-  .card-val.neutral { color: #e2e8f0; }
+  .card-val.neutral { color: #f1f5f9; }
   .card-val.neg { color: #f87171; }
   .card-val.pos { color: #34d399; }
-  .card-sub { font-size: 11px; color: #475569; }
+  .card-sub { font-size: 11px; color: #94a3b8; }
+
+  /* ── Sección Patrimonio Total ── */
+  .patrimonio-section { margin-bottom: 18px; }
+  .patrimonio-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .card-patrimonio { background: #0f1e35; border: 1px solid #1e4a6e; border-radius: 12px; padding: 15px 16px; position: relative; overflow: hidden; }
+  .card-patrimonio::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, #3b82f6, #6366f1); }
+  .card-patrimonio .card-label { color: #7eb8d4; }
+  .card-patrimonio .card-val { font-size: 17px; color: #bfdbfe; }
+  .card-patrimonio .card-sub { color: #6ea8c8; }
+  .card-patrimonio.total { background: #0d1f38; border-color: #2563eb; }
+  .card-patrimonio.total::before { background: linear-gradient(90deg, #2563eb, #7c3aed); }
+  .card-patrimonio.total .card-val { color: #93c5fd; font-size: 20px; }
+
+  /* ── Input manual patrimonio ── */
+  .pat-input { background: #0d1a2e; border: 1px solid #1e3a5f; border-radius: 6px; padding: 4px 8px; color: #bfdbfe; font-size: 14px; font-weight: 700; width: 100%; margin-top: 4px; outline: none; font-variant-numeric: tabular-nums; }
+  .pat-input:focus { border-color: #3b82f6; }
+  .pat-hint { font-size: 10px; color: #64748b; margin-top: 3px; }
+
+  /* ── Tabla ── */
   .table-wrap { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
   .table-head { padding: 13px 18px; border-bottom: 1px solid #1e3a5f; display: flex; justify-content: space-between; align-items: center; }
   .table-head span { font-size: 13px; font-weight: 700; color: #e2e8f0; }
@@ -43,7 +65,7 @@
   .table-scroll { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead tr { background: #0e1520; }
-  thead th { padding: 9px 12px; text-align: right; font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; cursor: pointer; user-select: none; transition: color 0.15s; }
+  thead th { padding: 9px 12px; text-align: right; font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; cursor: pointer; user-select: none; transition: color 0.15s; }
   thead th:hover { color: #818cf8; }
   thead th.left { text-align: left; }
   tbody tr { border-top: 1px solid #1a2d3e; transition: background 0.1s; }
@@ -52,8 +74,8 @@
   tbody tr.odd { background: #162540; }
   td { padding: 10px 12px; text-align: right; vertical-align: middle; }
   td.left { text-align: left; }
-  td.dimmed { color: #64748b; }
-  td.bright { color: #e2e8f0; font-weight: 600; }
+  td.dimmed { color: #94a3b8; }
+  td.bright { color: #f1f5f9; font-weight: 600; }
   td.pos { color: #34d399; font-weight: 700; }
   td.neg { color: #f87171; font-weight: 700; }
   .sym { display: inline-block; border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; color: #fff; white-space: nowrap; }
@@ -65,9 +87,9 @@
   .chart-box h4 { font-size: 13px; font-weight: 700; color: #e2e8f0; margin-bottom: 10px; }
   .donut-svg { display: block; margin: 0 auto; }
   .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 10px; margin-top: 10px; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #64748b; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #94a3b8; }
   .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .legend-pct { margin-left: auto; color: #475569; }
+  .legend-pct { margin-left: auto; color: #64748b; }
   .rankings { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .rank-box { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; padding: 16px; }
   .rank-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
@@ -75,21 +97,22 @@
   .rank-box h4.red { color: #f87171; }
   .rank-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1a2d3e; }
   .rank-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-  .rank-amt { font-size: 11px; color: #475569; }
+  .rank-amt { font-size: 11px; color: #94a3b8; }
   .dist-cell { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
   .dist-bar { height: 3px; border-radius: 2px; min-width: 3px; }
+  .divider { border: none; border-top: 1px solid #1e3a5f; margin: 14px 0 16px; }
 </style>
 </head>
 <body>
 <div class="root">
   <div class="header">
     <div class="header-left">
-      <h1>📈 Portfolio CEDEAR <span class="header-badge" id="pos-count">— posiciones</span></h1>
+      <h1>📈 Portfolio <span class="header-badge" id="pos-count">— posiciones</span></h1>
       <div class="header-sub" id="status-line">⟳ Cargando…</div>
     </div>
     <div class="hbtns">
       <button class="btn btn-ghost btn-sm" onclick="doRefresh()">↻ Refresh</button>
-      <button class="btn btn-success" onclick="togglePanel()">🔗 Sheets on</button>
+      <button class="btn btn-success" onclick="togglePanel()">🔗 Sheets</button>
     </div>
   </div>
 
@@ -104,6 +127,8 @@
     <div class="error-box" id="error-box" style="display:none"></div>
   </div>
 
+  <!-- CEDEARs -->
+  <div class="section-label">📊 CEDEARs</div>
   <div class="cards">
     <div class="card"><div class="card-label">Capital invertido</div><div class="card-val neutral" id="c-invertido">—</div><div class="card-sub">costo base total ARS</div></div>
     <div class="card"><div class="card-label">Saldo actual</div><div class="card-val neutral" id="c-saldo">—</div><div class="card-sub">valuación hoy en pesos</div></div>
@@ -112,8 +137,61 @@
     <div class="card"><div class="card-label">Valuación USD</div><div class="card-val neutral" id="c-usd">—</div><div class="card-sub">saldo en dólares</div></div>
   </div>
 
+  <hr class="divider"/>
+
+  <!-- Patrimonio total -->
+  <div class="patrimonio-section">
+    <div class="section-label">🏦 Patrimonio total</div>
+    <div class="patrimonio-grid">
+      <div class="card-patrimonio">
+        <div class="card-label">XOM · Exxonmobil</div>
+        <div style="margin-top:4px">
+          <input class="pat-input" id="xom-precio" type="number" placeholder="precio actual USD" oninput="recalcPatrimonio()"/>
+        </div>
+        <div class="pat-hint">50 acciones · PPC USD 103</div>
+        <div class="card-val" id="xom-saldo" style="margin-top:8px">—</div>
+        <div class="card-sub">saldo en ARS</div>
+      </div>
+      <div class="card-patrimonio">
+        <div class="card-label">SNEBO · San Miguel ON 2029</div>
+        <div style="margin-top:4px">
+          <input class="pat-input" id="snebo-precio" type="number" placeholder="precio c/100 nominales ARS" oninput="recalcPatrimonio()"/>
+        </div>
+        <div class="pat-hint">1270 nominales · PPC $130.985 · (ej: 103000)</div>
+        <div class="card-val" id="snebo-saldo" style="margin-top:8px">—</div>
+        <div class="card-sub">saldo en ARS</div>
+      </div>
+      <div class="card-patrimonio">
+        <div class="card-label">CCL actual</div>
+        <div style="margin-top:4px">
+          <input class="pat-input" id="ccl-input" type="number" placeholder="CCL" oninput="recalcPatrimonio()"/>
+        </div>
+        <div class="pat-hint">se actualiza desde H1 del sheet</div>
+        <div class="card-val neutral" id="ccl-display" style="margin-top:8px; font-size:15px">—</div>
+        <div class="card-sub">ARS por USD</div>
+      </div>
+      <div class="card-patrimonio">
+        <div class="card-label">₿ Cripto · CoinGecko</div>
+        <div class="card-val" id="cripto-usd-val" style="margin-top:8px; font-size:15px; color:#f59e0b">—</div>
+        <div class="card-sub" style="margin-bottom:6px">total en USD</div>
+        <div class="card-val" id="cripto-saldo">—</div>
+        <div class="card-sub">saldo en ARS</div>
+        <div style="margin-top:8px; display:flex; gap:6px; align-items:center;">
+          <button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px" onclick="fetchCripto()">↻ actualizar</button>
+        </div>
+        <div style="font-size:10px;color:#334155;margin-top:5px" id="cripto-status">no cargado</div>
+      </div>
+      <div class="card-patrimonio total">
+        <div class="card-label">Patrimonio total</div>
+        <div class="card-val" id="pat-total">—</div>
+        <div class="card-sub">CEDEARs + XOM + SNEBO + Cripto</div>
+        <div style="margin-top:8px; font-size:11px; color:#3b82f6" id="pat-usd">— USD</div>
+      </div>
+    </div>
+  </div>
+
   <div class="table-wrap">
-    <div class="table-head"><span>Posiciones</span><small>Clic en columna para ordenar</small></div>
+    <div class="table-head"><span>Posiciones CEDEARs</span><small>Clic en columna para ordenar</small></div>
     <div class="table-scroll">
       <table>
         <thead><tr>
@@ -153,42 +231,32 @@ const COLORS = ["#6366f1","#8b5cf6","#22d3ee","#3b82f6","#10b981","#f59e0b","#ef
 
 let positions = [], summary = {}, sortKey = 'saldoActual', sortDir = -1;
 let currentUrl = DEFAULT_URL, lastUpdate = null, colorMap = {};
+let cclValue = 0;
 
-// ── Número argentino: limpia $ spaces - y convierte puntos/comas ──────────
+// ── Número argentino ──────────────────────────────────────────────────────
 function parseNum(s) {
   if (!s) return 0;
-  s = String(s).trim();
-  s = s.replace(/[$`"]/g, '').trim();
+  s = String(s).trim().replace(/[$`"]/g, '').trim();
   s = s.replace(/^-\s+/, '-');
   if (/\d\.\d{3}(,|\.|$)/.test(s) || /,\d{1,2}$/.test(s)) {
     s = s.replace(/\./g, '').replace(',', '.');
-  } else {
-    s = s.replace(/,/g, '');
-  }
+  } else { s = s.replace(/,/g, ''); }
   const n = parseFloat(s);
   return isNaN(n) ? 0 : n;
 }
 
-// ── Porcentaje: el CSV ya trae "+0,03%" o "-6,78%" → devuelve 0.03 o -6.78
 function parsePct(s) {
   if (!s) return 0;
-  s = String(s).replace(/[$`"%\s"]/g, '').trim();
-  s = s.replace(/^-\s+/, '-');
-  // formato argentino con coma decimal
+  s = String(s).replace(/[$`"%\s"]/g, '').trim().replace(/^-\s+/, '-');
   if (/,\d{1,2}$/.test(s)) s = s.replace(',', '.');
   const n = parseFloat(s);
   return isNaN(n) ? 0 : n;
 }
 
-// ── CSV parser respetando comillas ────────────────────────────────────────
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
-  // detectar separador
   const firstLine = lines[0];
-  const commas = (firstLine.match(/,/g)||[]).length;
-  const semis  = (firstLine.match(/;/g)||[]).length;
-  const sep = semis > commas ? ';' : ',';
-
+  const sep = (firstLine.match(/;/g)||[]).length > (firstLine.match(/,/g)||[]).length ? ';' : ',';
   return lines.map(line => {
     const cells = []; let cur = '', inQ = false;
     for (let i = 0; i < line.length; i++) {
@@ -202,7 +270,6 @@ function parseCSV(text) {
   });
 }
 
-// ── Proxies con fallback ──────────────────────────────────────────────────
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfdEiUw-GsiEZoC4nLafd745zxCyRJVbxDxqoZeN8nkUPtHu-jFmDw2ThDnZEFhNof/exec';
 
 async function fetchCSV(url) {
@@ -213,7 +280,6 @@ async function fetchCSV(url) {
   return txt;
 }
 
-// ── Fetch + parse principal ───────────────────────────────────────────────
 async function fetchLive(url) {
   setStatus('loading');
   document.getElementById('error-box').style.display = 'none';
@@ -221,52 +287,59 @@ async function fetchLive(url) {
     const raw = await fetchCSV(url);
     const rows = parseCSV(raw);
 
-    // ── 1. Leer resumen de las primeras filas ─────────────────────────────
+    // ── 1. Leer resumen + CCL ─────────────────────────────────────────────
     let sumInv = 0, sumSaldo = 0, sumRes = 0, sumRend = 0, sumUSD = 0;
     rows.forEach(r => {
       const lbl = (r[0]||'').trim().toLowerCase();
-      // columna C (índice 2) tiene el valor
-      if (/^invertido/.test(lbl))       sumInv   = parseNum(r[2]);
-      if (/^saldo\s*pesos/.test(lbl))   sumSaldo  = parseNum(r[2]);
-      if (/^resultado/.test(lbl))       sumRes    = parseNum(r[2]);
-      if (/^rendimiento/.test(lbl))     sumRend   = parsePct(r[2]);
-      if (/^saldo\s*usd/.test(lbl))     sumUSD    = parseNum(r[2]);
+      if (/^invertido/.test(lbl))     sumInv   = parseNum(r[2]);
+      if (/^saldo\s*pesos/.test(lbl)) sumSaldo  = parseNum(r[2]);
+      if (/^resultado/.test(lbl))     sumRes    = parseNum(r[2]);
+      if (/^rendimiento/.test(lbl))   sumRend   = parsePct(r[2]);
+      if (/^saldo\s*usd/.test(lbl))   sumUSD    = parseNum(r[2]);
+      // CCL está en I1 → columna 8 (índice), fila donde col A está vacía y col H tiene valor
+      const possibleCCL = parseNum(r[8]);
+      if (!lbl && possibleCCL > 500 && possibleCCL < 5000) {
+        cclValue = possibleCCL;
+      }
     });
 
     // ── 2. Encontrar fila header ──────────────────────────────────────────
     const hi = rows.findIndex(r => r.some(c => /s[íi]mbolo|symbol/i.test(c)));
-    if (hi < 0) throw new Error('No se encontró columna "Símbolo". Verificá que publicaste la hoja "lista de seguimiento".');
+    if (hi < 0) throw new Error('No se encontró columna "Símbolo".');
 
     const hdr = rows[hi];
-    // Mapeo EXACTO por nombre de columna (case-insensitive, sin regex complicado)
     function colIdx(keywords) {
       return hdr.findIndex(h => keywords.some(k => h.toLowerCase().includes(k.toLowerCase())));
     }
 
-    const iSym    = colIdx(['símbolo','simbolo','symbol']);
-    const iAct    = colIdx(['activo','nombre','name']);
-    const iCed    = colIdx(['cedears','cant.','cantidad']);
-    const iPC     = colIdx(['precio cedear','precio actual']);
-    const iPCom   = colIdx(['precio compra']);
-    const iSaldo  = colIdx(['saldo actual','valor actual']);
-    const iMonto  = colIdx(['monto compra','costo']);
-    const iWL     = colIdx(['win/loss','win loss','ganancia','resultado']);      // Win/Loss (ARS)
-    const iPct    = colIdx(['win/loss %','win loss %','%','rendimiento']);       // Win/Loss %
-    const iRatio  = colIdx(['ratio']);
-    const iUSD    = colIdx(['saldo usd','usd']);
-    const iDist   = colIdx(['distribucion','distribución','dist']);
+    const iSym   = colIdx(['símbolo','simbolo','symbol']);
+    const iAct   = colIdx(['activo','nombre','name']);
+    const iCed   = colIdx(['cant.activos','cant.','cantidad','cedears']);
+    const iPC    = colIdx(['precio actual']);
+    const iPCom  = colIdx(['precio compra']);
+    const iSaldo = colIdx(['saldo actual']);
+    const iMonto = colIdx(['monto compra','costo']);
+    const iWL    = colIdx(['win/loss %','win/loss','ganancia','resultado']);
+    const iPct   = colIdx(['win/loss %']);
+    const iUSD   = colIdx(['saldo usd','usd']);
+    const iDist  = colIdx(['distribucion','distribución','dist']);
 
-    // ── 3. Parsear filas de datos ─────────────────────────────────────────
+    // win/loss ARS vs % — buscar por orden
+    const iWLars = hdr.findIndex(h => /win\/loss$/i.test(h.trim()));
+    const iWLpct = hdr.findIndex(h => /win\/loss\s*%/i.test(h.trim()));
+
+    // ── 3. Parsear filas de datos (solo CEDEARs) ──────────────────────────
     const dataRows = rows.slice(hi + 1).filter(r => {
       const sym = (r[iSym] || '').trim();
-      return sym.length >= 2 && sym.length <= 6 && /^[A-Za-z]/.test(sym);
+      const tipo = (r[colIdx(['tipo'])] || '').trim().toLowerCase();
+      return sym.length >= 2 && sym.length <= 6 && /^[A-Za-z]/.test(sym) && tipo === 'cedear';
     });
 
-    if (dataRows.length < 1) throw new Error('No se encontraron posiciones. Revisá la hoja publicada.');
+    if (dataRows.length < 1) throw new Error('No se encontraron posiciones CEDEAR.');
 
     const get = (r, i) => (i >= 0 && i < r.length) ? (r[i] || '') : '';
 
-    const newPos = dataRows.map((r, idx) => {
+    const newPos = dataRows.map((r) => {
       const symbol       = get(r, iSym).trim();
       const activo       = get(r, iAct).trim();
       const cedears      = parseNum(get(r, iCed));
@@ -274,19 +347,16 @@ async function fetchLive(url) {
       const precioCompra = parseNum(get(r, iPCom));
       const saldoActual  = parseNum(get(r, iSaldo));
       const montoCompra  = parseNum(get(r, iMonto));
-      const winLoss      = parseNum(get(r, iWL));
-      const pctVal       = parsePct(get(r, iPct));
-      const ratio        = parseNum(get(r, iRatio)) || 1;
+      const winLoss      = parseNum(get(r, iWLars >= 0 ? iWLars : iWL));
+      const pctVal       = parsePct(get(r, iWLpct >= 0 ? iWLpct : iPct));
       const saldoUSD     = parseNum(get(r, iUSD));
       const dist         = parsePct(get(r, iDist));
-      return { symbol, activo, cedears, precioCedear, precioCompra, saldoActual, montoCompra, winLoss, pct: pctVal, ratio, saldoUSD, dist };
+      return { symbol, activo, cedears, precioCedear, precioCompra, saldoActual, montoCompra, winLoss, pct: pctVal, saldoUSD, dist };
     });
 
-    // Recalc dist si no vino del CSV
     const totalPesos = newPos.reduce((s, p) => s + p.saldoActual, 0);
     newPos.forEach(p => { if (!p.dist && totalPesos) p.dist = (p.saldoActual / totalPesos) * 100; });
 
-    // Fijar colores una sola vez
     if (!Object.keys(colorMap).length) newPos.forEach((p, i) => colorMap[p.symbol] = i);
 
     positions = newPos;
@@ -298,14 +368,91 @@ async function fetchLive(url) {
       rendimiento: sumRend   || (totalInv ? (totalPesos - totalInv) / totalInv * 100 : 0),
       saldoUSD:    sumUSD    || newPos.reduce((s, p) => s + p.saldoUSD, 0)
     };
+
+    // Actualizar CCL en el input si lo leimos del sheet
+    if (cclValue > 0) {
+      document.getElementById('ccl-input').value = cclValue;
+      document.getElementById('ccl-display').textContent = fARS(cclValue).replace('$\u202F','$ ');
+    }
+
     lastUpdate = new Date();
     setStatus('live');
     render();
+    recalcPatrimonio();
   } catch(e) {
     document.getElementById('error-box').style.display = '';
     document.getElementById('error-box').textContent = '❌ ' + e.message;
     setStatus('error');
   }
+}
+
+// ── Cripto holdings ───────────────────────────────────────────────────────
+const CRIPTO_HOLDINGS = [
+  { id: 'bitcoin',           qty: 0.00030813 },
+  { id: 'tether',            qty: 365.72     },
+  { id: 'algorand',          qty: 1408.79    },
+  { id: 'secret',            qty: 1193.24    },
+  { id: 'solana',            qty: 1.034      },
+  { id: 'iota',              qty: 411.8      },
+  { id: 'avalanche-2',       qty: 4.2506     },
+  { id: 'stellar',           qty: 230.48     },
+  { id: 'cardano',           qty: 96.79      },
+  { id: 'vechain',           qty: 3374.31    },
+  { id: 'polkadot',          qty: 13.17      },
+  { id: 'hedera-hashgraph',  qty: 57.92      },
+  { id: 'injective-protocol',qty: 1.0363     },
+  { id: 'storj',             qty: 29.08      },
+  { id: 'badger-dao',        qty: 5.6764     },
+];
+
+let criptoTotalUSD = 0;
+
+async function fetchCripto() {
+  document.getElementById('cripto-status').textContent = '⟳ consultando CoinGecko…';
+  try {
+    const ids = CRIPTO_HOLDINGS.map(h => h.id).join(',');
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const prices = await res.json();
+    let total = 0;
+    CRIPTO_HOLDINGS.forEach(h => {
+      const px = prices[h.id]?.usd || 0;
+      total += px * h.qty;
+    });
+    criptoTotalUSD = total;
+    document.getElementById('cripto-usd-val').textContent = fUSD(total);
+    document.getElementById('cripto-status').textContent = '🟢 ' + new Date().toLocaleTimeString('es-AR');
+    recalcPatrimonio();
+  } catch(e) {
+    document.getElementById('cripto-status').textContent = '🔴 error: ' + e.message;
+  }
+}
+
+// ── Patrimonio ────────────────────────────────────────────────────────────
+function recalcPatrimonio() {
+  const ccl     = parseFloat(document.getElementById('ccl-input').value) || cclValue || 0;
+  const xomPx   = parseFloat(document.getElementById('xom-precio').value) || 0;
+  const sneboPx = parseFloat(document.getElementById('snebo-precio').value) || 0;
+
+  if (ccl > 0) {
+    document.getElementById('ccl-display').textContent = '$ ' + Math.round(ccl).toLocaleString('es-AR');
+  }
+
+  const xomARS    = xomPx    > 0 ? 50 * xomPx * ccl : 0;
+  const sneboARS  = sneboPx  > 0 ? (sneboPx / 100) * 1270 : 0;
+  const criptoARS = criptoTotalUSD > 0 ? criptoTotalUSD * ccl : 0;
+
+  document.getElementById('xom-saldo').textContent    = xomARS    > 0 ? fARS(xomARS)    : '—';
+  document.getElementById('snebo-saldo').textContent  = sneboARS  > 0 ? fARS(sneboARS)  : '—';
+  document.getElementById('cripto-saldo').textContent = criptoARS > 0 ? fARS(criptoARS) : '—';
+
+  const cedarSaldo = summary.saldoPesos || 0;
+  const total = cedarSaldo + xomARS + sneboARS + criptoARS;
+  const totalUSD = ccl > 0 ? total / ccl : 0;
+
+  document.getElementById('pat-total').textContent = total > 0 ? fARS(total) : '—';
+  document.getElementById('pat-usd').textContent   = totalUSD > 0 ? '≈ ' + fUSD(totalUSD) : '—';
 }
 
 // ── Status ────────────────────────────────────────────────────────────────
@@ -319,7 +466,6 @@ function setStatus(s) {
 
 function doRefresh() { colorMap = {}; fetchLive(currentUrl); }
 
-// ── Sort ──────────────────────────────────────────────────────────────────
 function sortBy(k) { if (sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=-1; } renderTable(); }
 function getSorted() {
   return [...positions].sort((a, b) => {
@@ -328,7 +474,6 @@ function getSorted() {
   });
 }
 
-// ── Formatters ────────────────────────────────────────────────────────────
 function fARS(n, sign=false) {
   if (n == null || isNaN(n)) return '–';
   const s = n < 0 ? '-' : (sign && n > 0 ? '+' : '');
@@ -336,7 +481,7 @@ function fARS(n, sign=false) {
 }
 function fUSD(n) {
   if (!n) return '–';
-  return '$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return 'USD ' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 function fPct(n, sign=true) {
   if (n == null || isNaN(n)) return '–';
@@ -348,7 +493,6 @@ function symBadge(sym) {
   return `<span class="sym" style="background:${COLORS[ci % COLORS.length]}">${sym}</span>`;
 }
 
-// ── Render ────────────────────────────────────────────────────────────────
 function renderCards() {
   const s = summary;
   document.getElementById('c-invertido').textContent = fARS(s.invertido);
@@ -430,7 +574,6 @@ function renderRankings() {
 
 function render() { renderCards(); renderTable(); renderDonut(); renderRankings(); }
 
-// ── Panel ─────────────────────────────────────────────────────────────────
 let panelOpen = false;
 function togglePanel() {
   panelOpen = !panelOpen;
@@ -446,9 +589,10 @@ async function handleConnect() {
   window._ar = setInterval(() => fetchLive(currentUrl), 5*60*1000);
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────
 fetchLive(DEFAULT_URL);
+fetchCripto();
 window._ar = setInterval(() => fetchLive(currentUrl), 5*60*1000);
+setInterval(() => fetchCripto(), 15*60*1000);
 </script>
 </body>
 </html>
