@@ -327,7 +327,7 @@ async function fetchLive(url) {
       if (/^saldo\s*pesos/.test(lbl)) sumSaldo  = parseNum(r[2]);
       if (/^resultado/.test(lbl))     sumRes    = parseNum(r[2]);
       if (/^rendimiento/.test(lbl))   sumRend   = parsePct(r[2]);
-      if (/^saldo\s*usd/.test(lbl))   sumUSD    = parseNum(r[2]);
+      if (/^saldo\s*usd/.test(lbl))   sumUSD    = parseNum(r[3]);
       // CCL está en I1 → columna 8 (índice), fila donde col A está vacía y col H tiene valor
       const possibleCCL = parseNum(r[8]);
       if (!lbl && possibleCCL > 500 && possibleCCL < 5000) {
