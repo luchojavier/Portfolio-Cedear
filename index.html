@@ -28,8 +28,6 @@
   .url-input { flex: 1; background: #0d1a2e; border: 1px solid #1e3a5f; border-radius: 8px; padding: 10px 13px; color: #e2e8f0; font-size: 13px; outline: none; }
   .url-input::placeholder { color: #64748b; }
   .error-box { margin-top: 10px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 10px 13px; font-size: 13px; color: #f87171; }
-
-  /* ── Sección CEDEAR cards ── */
   .section-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
   .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 8px; }
   .card { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; padding: 15px 16px; }
@@ -39,8 +37,6 @@
   .card-val.neg { color: #f87171; }
   .card-val.pos { color: #34d399; }
   .card-sub { font-size: 11px; color: #94a3b8; }
-
-  /* ── Sección Patrimonio Total ── */
   .patrimonio-section { margin-bottom: 18px; }
   .patrimonio-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
   .card-patrimonio { background: #0f1e35; border: 1px solid #1e4a6e; border-radius: 12px; padding: 15px 16px; position: relative; overflow: hidden; }
@@ -51,19 +47,13 @@
   .card-patrimonio.total { background: #0d1f38; border-color: #2563eb; }
   .card-patrimonio.total::before { background: linear-gradient(90deg, #2563eb, #7c3aed); }
   .card-patrimonio.total .card-val { color: #93c5fd; font-size: 20px; }
-
-  /* ── Input manual patrimonio ── */
   .pat-input { background: #0d1a2e; border: 1px solid #1e3a5f; border-radius: 6px; padding: 4px 8px; color: #bfdbfe; font-size: 14px; font-weight: 700; width: 100%; margin-top: 4px; outline: none; font-variant-numeric: tabular-nums; }
   .pat-input:focus { border-color: #3b82f6; }
   .pat-hint { font-size: 10px; color: #64748b; margin-top: 3px; }
-
-  /* ── Fondos Balanz (mini filas dentro de la card) ── */
   .balanz-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
   .balanz-row label { font-size: 9.5px; color: #7eb8d4; flex: 1; line-height: 1.2; }
   .balanz-row input { width: 64px; background: #0d1a2e; border: 1px solid #1e3a5f; border-radius: 5px; padding: 3px 5px; color: #bfdbfe; font-size: 12px; font-weight: 700; outline: none; text-align: right; }
   .balanz-row input:focus { border-color: #3b82f6; }
-
-  /* ── Tabla ── */
   .table-wrap { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
   .table-head { padding: 13px 18px; border-bottom: 1px solid #1e3a5f; display: flex; justify-content: space-between; align-items: center; }
   .table-head span { font-size: 13px; font-weight: 700; color: #e2e8f0; }
@@ -107,10 +97,7 @@
   .dist-cell { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
   .dist-bar { height: 3px; border-radius: 2px; min-width: 3px; }
   .divider { border: none; border-top: 1px solid #1e3a5f; margin: 14px 0 16px; }
-
-  @media (max-width: 1100px) {
-    .patrimonio-grid { grid-template-columns: repeat(3, 1fr); }
-  }
+  @media (max-width: 1100px) { .patrimonio-grid { grid-template-columns: repeat(3, 1fr); } }
 </style>
 </head>
 <body>
@@ -137,7 +124,6 @@
     <div class="error-box" id="error-box" style="display:none"></div>
   </div>
 
-  <!-- CEDEARs -->
   <div class="section-label">📊 CEDEARs</div>
   <div class="cards">
     <div class="card"><div class="card-label">Capital invertido</div><div class="card-val neutral" id="c-invertido">—</div><div class="card-sub">costo base total ARS</div></div>
@@ -149,33 +135,26 @@
 
   <hr class="divider"/>
 
-  <!-- Patrimonio total -->
   <div class="patrimonio-section">
     <div class="section-label">🏦 Patrimonio total</div>
     <div class="patrimonio-grid">
       <div class="card-patrimonio">
         <div class="card-label">XOM · Exxonmobil</div>
-        <div style="margin-top:4px">
-          <input class="pat-input" id="xom-precio" type="number" placeholder="precio actual USD" oninput="recalcPatrimonio()"/>
-        </div>
+        <div style="margin-top:4px"><input class="pat-input" id="xom-precio" type="number" placeholder="precio actual USD" oninput="recalcPatrimonio()"/></div>
         <div class="pat-hint">50 acciones · PPC USD 103</div>
         <div class="card-val" id="xom-saldo" style="margin-top:8px">—</div>
         <div class="card-sub">saldo en ARS</div>
       </div>
       <div class="card-patrimonio">
         <div class="card-label">SNEBO · San Miguel ON 2029</div>
-        <div style="margin-top:4px">
-          <input class="pat-input" id="snebo-precio" type="number" placeholder="precio c/100 nominales ARS" oninput="recalcPatrimonio()"/>
-        </div>
+        <div style="margin-top:4px"><input class="pat-input" id="snebo-precio" type="number" placeholder="precio c/100 nominales ARS" oninput="recalcPatrimonio()"/></div>
         <div class="pat-hint">1270 nominales · PPC $130.985 · (ej: 103000)</div>
         <div class="card-val" id="snebo-saldo" style="margin-top:8px">—</div>
         <div class="card-sub">saldo en ARS</div>
       </div>
       <div class="card-patrimonio">
         <div class="card-label">CCL actual</div>
-        <div style="margin-top:4px">
-          <input class="pat-input" id="ccl-input" type="number" placeholder="CCL" oninput="recalcPatrimonio()"/>
-        </div>
+        <div style="margin-top:4px"><input class="pat-input" id="ccl-input" type="number" placeholder="CCL" oninput="recalcPatrimonio()"/></div>
         <div class="pat-hint">se actualiza desde H1 del sheet</div>
         <div class="card-val neutral" id="ccl-display" style="margin-top:8px; font-size:15px">—</div>
         <div class="card-sub">ARS por USD</div>
@@ -186,33 +165,19 @@
         <div class="card-sub" style="margin-bottom:6px">total en USD</div>
         <div class="card-val" id="cripto-saldo">—</div>
         <div class="card-sub">saldo en ARS</div>
-        <div style="margin-top:8px; display:flex; gap:6px; align-items:center;">
-          <button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px" onclick="fetchCripto()">↻ actualizar</button>
-        </div>
+        <div style="margin-top:8px; display:flex; gap:6px; align-items:center;"><button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px" onclick="fetchCripto()">↻ actualizar</button></div>
         <div style="font-size:10px;color:#334155;margin-top:5px" id="cripto-status">no cargado</div>
       </div>
-
-      <!-- ── Fondos Balanz (NUEVO) ── -->
       <div class="card-patrimonio">
         <div class="card-label">💵 Fondos Balanz (saldo USD)</div>
-        <div class="balanz-row">
-          <label>Ahorro en Dólares A</label>
-          <input type="number" id="fb-0" oninput="recalcPatrimonio()" placeholder="0"/>
-        </div>
-        <div class="balanz-row">
-          <label>Money Market USD A</label>
-          <input type="number" id="fb-1" oninput="recalcPatrimonio()" placeholder="0"/>
-        </div>
-        <div class="balanz-row">
-          <label>Estrategia I USD A</label>
-          <input type="number" id="fb-2" oninput="recalcPatrimonio()" placeholder="0"/>
-        </div>
+        <div class="balanz-row"><label>Ahorro en Dólares A</label><input type="number" id="fb-0" oninput="recalcPatrimonio()" placeholder="0"/></div>
+        <div class="balanz-row"><label>Money Market USD A</label><input type="number" id="fb-1" oninput="recalcPatrimonio()" placeholder="0"/></div>
+        <div class="balanz-row"><label>Estrategia I USD A</label><input type="number" id="fb-2" oninput="recalcPatrimonio()" placeholder="0"/></div>
         <div class="card-val" id="balanz-usd-val" style="margin-top:8px; font-size:15px; color:#a78bfa">—</div>
         <div class="card-sub" style="margin-bottom:2px">total en USD</div>
         <div class="card-val" id="balanz-saldo">—</div>
         <div class="card-sub">saldo en ARS</div>
       </div>
-
       <div class="card-patrimonio total">
         <div class="card-label">Patrimonio total</div>
         <div class="card-val" id="pat-total">—</div>
@@ -265,7 +230,6 @@ let positions = [], summary = {}, sortKey = 'saldoActual', sortDir = -1;
 let currentUrl = DEFAULT_URL, lastUpdate = null, colorMap = {};
 let cclValue = 0;
 
-// ── Número argentino ──────────────────────────────────────────────────────
 function parseNum(s) {
   if (!s) return 0;
   s = String(s).trim().replace(/[$`"]/g, '').trim();
@@ -320,22 +284,25 @@ async function fetchLive(url) {
     const rows = parseCSV(raw);
 
     // ── 1. Leer resumen + CCL ─────────────────────────────────────────────
+    // FIX 1: Saldo USD: columna real es D (r[3]), no C (r[2]).
+    // FIX 2: CCL: actualizarCCL() escribe en H1 → fila 1 (idx 0), columna H (índice 7).
     let sumInv = 0, sumSaldo = 0, sumRes = 0, sumRend = 0, sumUSD = 0;
-    rows.forEach(r => {
+    rows.forEach((r, idx) => {
       const lbl = (r[0]||'').trim().toLowerCase();
       if (/^invertido/.test(lbl))     sumInv   = parseNum(r[2]);
       if (/^saldo\s*pesos/.test(lbl)) sumSaldo  = parseNum(r[2]);
       if (/^resultado/.test(lbl))     sumRes    = parseNum(r[2]);
       if (/^rendimiento/.test(lbl))   sumRend   = parsePct(r[2]);
       if (/^saldo\s*usd/.test(lbl))   sumUSD    = parseNum(r[3]);
-      // CCL está en I1 → columna 8 (índice), fila donde col A está vacía y col H tiene valor
-      const possibleCCL = parseNum(r[8]);
-      if (!lbl && possibleCCL > 500 && possibleCCL < 5000) {
-        cclValue = possibleCCL;
+
+      if (idx === 0) {
+        const possibleCCL = parseNum(r[7]);
+        if (possibleCCL > 500 && possibleCCL < 5000) {
+          cclValue = possibleCCL;
+        }
       }
     });
 
-    // ── 2. Encontrar fila header ──────────────────────────────────────────
     const hi = rows.findIndex(r => r.some(c => /s[íi]mbolo|symbol/i.test(c)));
     if (hi < 0) throw new Error('No se encontró columna "Símbolo".');
 
@@ -356,11 +323,9 @@ async function fetchLive(url) {
     const iUSD   = colIdx(['saldo usd','usd']);
     const iDist  = colIdx(['distribucion','distribución','dist']);
 
-    // win/loss ARS vs % — buscar por orden
     const iWLars = hdr.findIndex(h => /win\/loss$/i.test(h.trim()));
     const iWLpct = hdr.findIndex(h => /win\/loss\s*%/i.test(h.trim()));
 
-    // ── 3. Parsear filas de datos (solo CEDEARs) ──────────────────────────
     const dataRows = rows.slice(hi + 1).filter(r => {
       const sym = (r[iSym] || '').trim();
       const tipo = (r[colIdx(['tipo'])] || '').trim().toLowerCase();
@@ -401,7 +366,6 @@ async function fetchLive(url) {
       saldoUSD:    sumUSD    || newPos.reduce((s, p) => s + p.saldoUSD, 0)
     };
 
-    // Actualizar CCL en el input si lo leimos del sheet
     if (cclValue > 0) {
       document.getElementById('ccl-input').value = cclValue;
       document.getElementById('ccl-display').textContent = fARS(cclValue).replace('$\u202F','$ ');
@@ -418,7 +382,6 @@ async function fetchLive(url) {
   }
 }
 
-// ── Cripto holdings ───────────────────────────────────────────────────────
 const CRIPTO_HOLDINGS = [
   { id: 'bitcoin',           qty: 0.00030813 },
   { id: 'tether',            qty: 365.72     },
@@ -461,7 +424,6 @@ async function fetchCripto() {
   }
 }
 
-// ── Fondos Balanz (NUEVO) ─────────────────────────────────────────────────
 function getBalanzTotalUSD() {
   let total = 0;
   for (let i = 0; i < 3; i++) {
@@ -471,7 +433,6 @@ function getBalanzTotalUSD() {
   return total;
 }
 
-// ── Patrimonio ────────────────────────────────────────────────────────────
 function recalcPatrimonio() {
   const ccl     = parseFloat(document.getElementById('ccl-input').value) || cclValue || 0;
   const xomPx   = parseFloat(document.getElementById('xom-precio').value) || 0;
@@ -501,7 +462,6 @@ function recalcPatrimonio() {
   document.getElementById('pat-usd').textContent   = totalUSD > 0 ? '≈ ' + fUSD(totalUSD) : '—';
 }
 
-// ── Status ────────────────────────────────────────────────────────────────
 function setStatus(s) {
   const el = document.getElementById('status-line');
   el.style.color = '';
@@ -642,3 +602,4 @@ setInterval(() => fetchCripto(), 15*60*1000);
 </script>
 </body>
 </html>
+
