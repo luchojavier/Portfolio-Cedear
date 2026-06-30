@@ -354,7 +354,11 @@ async function fetchLive(url) {
     });
 
     const totalPesos = newPos.reduce((s, p) => s + p.saldoActual, 0);
-    newPos.forEach(p => { if (!p.dist && totalPesos) p.dist = (p.saldoActual / totalPesos) * 100; });
+    // FIX 3: la columna "Distribución" del sheet viene como fracción decimal
+    // (formato % de Google Sheets exporta 0.091, no 9.1), así que ese dato
+    // nunca es confiable. Recalculamos siempre el porcentaje real a partir
+    // de saldoActual, que sí está bien parseado.
+    newPos.forEach(p => { if (totalPesos) p.dist = (p.saldoActual / totalPesos) * 100; });
 
     if (!Object.keys(colorMap).length) newPos.forEach((p, i) => colorMap[p.symbol] = i);
 
@@ -545,7 +549,11 @@ function renderTable() {
 function renderDonut() {
   const sorted = getSorted();
   const cx=100, cy=82, R=68, r=42;
-  let angle = -Math.PI/2, paths = '';
+  let angle = -Math.PI/2;
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.getElementById('donut-svg');
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
   sorted.forEach((p, i) => {
     const ci = colorMap[p.symbol] !== undefined ? colorMap[p.symbol] : i;
     const color = COLORS[ci % COLORS.length];
@@ -555,10 +563,19 @@ function renderDonut() {
     const xi1=cx+r*Math.cos(angle), yi1=cy+r*Math.sin(angle);
     const xi2=cx+r*Math.cos(angle+slice), yi2=cy+r*Math.sin(angle+slice);
     const lg = slice > Math.PI ? 1 : 0;
-    paths += `<path d="M${x1},${y1} A${R},${R} 0 ${lg} 1 ${x2},${y2} L${xi2},${yi2} A${r},${r} 0 ${lg} 0 ${xi1},${yi1} Z" fill="${color}" stroke="#0e1520" stroke-width="1.5" opacity="0.9"/>`;
+    const d = `M${x1},${y1} A${R},${R} 0 ${lg} 1 ${x2},${y2} L${xi2},${yi2} A${r},${r} 0 ${lg} 0 ${xi1},${yi1} Z`;
+
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', color);
+    path.setAttribute('stroke', '#0e1520');
+    path.setAttribute('stroke-width', '1.5');
+    path.setAttribute('opacity', '0.9');
+    svg.appendChild(path);
+
     angle += slice;
   });
-  document.getElementById('donut-svg').innerHTML = paths;
+
   document.getElementById('donut-legend').innerHTML = sorted.map((p, i) => {
     const ci = colorMap[p.symbol] !== undefined ? colorMap[p.symbol] : i;
     return `<div class="legend-item"><div class="legend-dot" style="background:${COLORS[ci%COLORS.length]}"></div><span>${p.symbol}</span><span class="legend-pct">${p.dist.toFixed(0)}%</span></div>`;
