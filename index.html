@@ -42,7 +42,7 @@
 
   /* ── Sección Patrimonio Total ── */
   .patrimonio-section { margin-bottom: 18px; }
-  .patrimonio-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .patrimonio-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
   .card-patrimonio { background: #0f1e35; border: 1px solid #1e4a6e; border-radius: 12px; padding: 15px 16px; position: relative; overflow: hidden; }
   .card-patrimonio::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, #3b82f6, #6366f1); }
   .card-patrimonio .card-label { color: #7eb8d4; }
@@ -56,6 +56,12 @@
   .pat-input { background: #0d1a2e; border: 1px solid #1e3a5f; border-radius: 6px; padding: 4px 8px; color: #bfdbfe; font-size: 14px; font-weight: 700; width: 100%; margin-top: 4px; outline: none; font-variant-numeric: tabular-nums; }
   .pat-input:focus { border-color: #3b82f6; }
   .pat-hint { font-size: 10px; color: #64748b; margin-top: 3px; }
+
+  /* ── Fondos Balanz (mini filas dentro de la card) ── */
+  .balanz-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
+  .balanz-row label { font-size: 9.5px; color: #7eb8d4; flex: 1; line-height: 1.2; }
+  .balanz-row input { width: 64px; background: #0d1a2e; border: 1px solid #1e3a5f; border-radius: 5px; padding: 3px 5px; color: #bfdbfe; font-size: 12px; font-weight: 700; outline: none; text-align: right; }
+  .balanz-row input:focus { border-color: #3b82f6; }
 
   /* ── Tabla ── */
   .table-wrap { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
@@ -101,6 +107,10 @@
   .dist-cell { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
   .dist-bar { height: 3px; border-radius: 2px; min-width: 3px; }
   .divider { border: none; border-top: 1px solid #1e3a5f; margin: 14px 0 16px; }
+
+  @media (max-width: 1100px) {
+    .patrimonio-grid { grid-template-columns: repeat(3, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -181,10 +191,32 @@
         </div>
         <div style="font-size:10px;color:#334155;margin-top:5px" id="cripto-status">no cargado</div>
       </div>
+
+      <!-- ── Fondos Balanz (NUEVO) ── -->
+      <div class="card-patrimonio">
+        <div class="card-label">💵 Fondos Balanz (saldo USD)</div>
+        <div class="balanz-row">
+          <label>Ahorro en Dólares A</label>
+          <input type="number" id="fb-0" oninput="recalcPatrimonio()" placeholder="0"/>
+        </div>
+        <div class="balanz-row">
+          <label>Money Market USD A</label>
+          <input type="number" id="fb-1" oninput="recalcPatrimonio()" placeholder="0"/>
+        </div>
+        <div class="balanz-row">
+          <label>Estrategia I USD A</label>
+          <input type="number" id="fb-2" oninput="recalcPatrimonio()" placeholder="0"/>
+        </div>
+        <div class="card-val" id="balanz-usd-val" style="margin-top:8px; font-size:15px; color:#a78bfa">—</div>
+        <div class="card-sub" style="margin-bottom:2px">total en USD</div>
+        <div class="card-val" id="balanz-saldo">—</div>
+        <div class="card-sub">saldo en ARS</div>
+      </div>
+
       <div class="card-patrimonio total">
         <div class="card-label">Patrimonio total</div>
         <div class="card-val" id="pat-total">—</div>
-        <div class="card-sub">CEDEARs + XOM + SNEBO + Cripto</div>
+        <div class="card-sub">CEDEARs + XOM + SNEBO + Cripto + Fondos</div>
         <div style="margin-top:8px; font-size:11px; color:#3b82f6" id="pat-usd">— USD</div>
       </div>
     </div>
@@ -429,11 +461,22 @@ async function fetchCripto() {
   }
 }
 
+// ── Fondos Balanz (NUEVO) ─────────────────────────────────────────────────
+function getBalanzTotalUSD() {
+  let total = 0;
+  for (let i = 0; i < 3; i++) {
+    const el = document.getElementById('fb-' + i);
+    total += parseFloat(el && el.value) || 0;
+  }
+  return total;
+}
+
 // ── Patrimonio ────────────────────────────────────────────────────────────
 function recalcPatrimonio() {
   const ccl     = parseFloat(document.getElementById('ccl-input').value) || cclValue || 0;
   const xomPx   = parseFloat(document.getElementById('xom-precio').value) || 0;
   const sneboPx = parseFloat(document.getElementById('snebo-precio').value) || 0;
+  const balanzUSD = getBalanzTotalUSD();
 
   if (ccl > 0) {
     document.getElementById('ccl-display').textContent = '$ ' + Math.round(ccl).toLocaleString('es-AR');
@@ -442,13 +485,16 @@ function recalcPatrimonio() {
   const xomARS    = xomPx    > 0 ? 50 * xomPx * ccl : 0;
   const sneboARS  = sneboPx  > 0 ? (sneboPx / 100) * 1270 : 0;
   const criptoARS = criptoTotalUSD > 0 ? criptoTotalUSD * ccl : 0;
+  const balanzARS = balanzUSD > 0 ? balanzUSD * ccl : 0;
 
   document.getElementById('xom-saldo').textContent    = xomARS    > 0 ? fARS(xomARS)    : '—';
   document.getElementById('snebo-saldo').textContent  = sneboARS  > 0 ? fARS(sneboARS)  : '—';
   document.getElementById('cripto-saldo').textContent = criptoARS > 0 ? fARS(criptoARS) : '—';
+  document.getElementById('balanz-usd-val').textContent = balanzUSD > 0 ? fUSD(balanzUSD) : '—';
+  document.getElementById('balanz-saldo').textContent   = balanzARS > 0 ? fARS(balanzARS) : '—';
 
   const cedarSaldo = summary.saldoPesos || 0;
-  const total = cedarSaldo + xomARS + sneboARS + criptoARS;
+  const total = cedarSaldo + xomARS + sneboARS + criptoARS + balanzARS;
   const totalUSD = ccl > 0 ? total / ccl : 0;
 
   document.getElementById('pat-total').textContent = total > 0 ? fARS(total) : '—';
