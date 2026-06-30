@@ -296,8 +296,10 @@ async function fetchLive(url) {
       if (/^saldo\s*usd/.test(lbl))   sumUSD    = parseNum(r[3]);
 
       if (idx === 0) {
-        const possibleCCL = parseNum(r[7]);
-        if (possibleCCL > 500 && possibleCCL < 5000) {
+        // CCL viene como "1555,2" (con coma decimal) — normalizar antes de parsear
+        var rawCCL = String(r[7] || '').replace(/['"]/g, '').trim().replace(',', '.');
+        var possibleCCL = parseFloat(rawCCL);
+        if (!isNaN(possibleCCL) && possibleCCL > 500 && possibleCCL < 5000) {
           cclValue = possibleCCL;
         }
       }
@@ -602,4 +604,3 @@ setInterval(() => fetchCripto(), 15*60*1000);
 </script>
 </body>
 </html>
-
