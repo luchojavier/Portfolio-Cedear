@@ -181,7 +181,7 @@
       <div class="card-patrimonio total">
         <div class="card-label">Patrimonio total</div>
         <div class="card-val" id="pat-total">—</div>
-        <div class="card-sub">CEDEARs + XOM + SNEBO + Cripto + Fondos</div>
+        <div class="card-sub">CEDEARs + Aguinaldo + XOM + SNEBO + Cripto + Fondos</div>
         <div style="margin-top:8px; font-size:11px; color:#3b82f6" id="pat-usd">— USD</div>
       </div>
     </div>
@@ -208,7 +208,8 @@
       </table>
     </div>
   </div>
-<div class="section-label">🎁 Aguinaldo</div>
+
+  <div class="section-label">🎁 Aguinaldo</div>
   <div class="cards">
     <div class="card"><div class="card-label">Capital invertido</div><div class="card-val neutral" id="ag-invertido">—</div><div class="card-sub">costo base ARS</div></div>
     <div class="card"><div class="card-label">Saldo actual</div><div class="card-val neutral" id="ag-saldo">—</div><div class="card-sub">valuación hoy</div></div>
@@ -230,6 +231,7 @@
     </div>
   </div>
   <hr class="divider"/>
+
   <div class="bottom">
     <div class="chart-box">
       <h4>Distribución</h4>
@@ -290,111 +292,125 @@ function parseCSV(text) {
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfdEiUw-GsiEZoC4nLafd745zxCyRJVbxDxqoZeN8nkUPtHu-jFmDw2ThDnZEFhNof/exec';
 
-async function fetchCSV(url) {
-  const res = await fetch(APPS_SCRIPT_URL, { signal: AbortSignal.timeout(15000) });
+// Timeout hecho a mano (sin AbortSignal) para evitar errores de "postMessage"
+// en entornos que interceptan fetch a través de un proxy entre ventanas.
+function fetchWithTimeout(url, ms) {
+  return Promise.race([
+    fetch(url),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout de conexión')), ms))
+  ]);
+}
+
+// Ahora recibe el nombre de la hoja y se lo manda al Apps Script como parámetro.
+async function fetchCSV(sheetName) {
+  const url = APPS_SCRIPT_URL + '?sheet=' + encodeURIComponent(sheetName);
+  const res = await fetchWithTimeout(url, 15000);
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const txt = await res.text();
   if (!txt || txt.length < 20) throw new Error('Respuesta vacía del servidor');
+  if (txt.indexOf('ERROR:') === 0) throw new Error(txt);
   return txt;
 }
 
-async function fetchLive(url) {
+// Parseo genérico: toma el CSV crudo de CUALQUIER hoja (misma estructura de
+// columnas) y devuelve { positions, summary, ccl }. La usan tanto
+// "lista de seguimiento" como "Aguinaldo".
+function parseSheetData(raw) {
+  const rows = parseCSV(raw);
+
+  let sumInv = 0, sumSaldo = 0, sumRes = 0, sumRend = 0, sumUSD = 0, ccl = 0;
+  rows.forEach((r, idx) => {
+    const lbl = (r[0]||'').trim().toLowerCase();
+    if (/^invertido/.test(lbl))     sumInv   = parseNum(r[2]);
+    if (/^saldo\s*pesos/.test(lbl)) sumSaldo  = parseNum(r[2]);
+    if (/^resultado/.test(lbl))     sumRes    = parseNum(r[2]);
+    if (/^rendimiento/.test(lbl))   sumRend   = parsePct(r[2]);
+    if (/^saldo\s*usd/.test(lbl))   sumUSD    = parseNum(r[3]);
+
+    if (idx === 0) {
+      var rawCCL = String(r[7] || '').replace(/['"]/g, '').trim().replace(',', '.');
+      var possibleCCL = parseFloat(rawCCL);
+      if (!isNaN(possibleCCL) && possibleCCL > 500 && possibleCCL < 5000) {
+        ccl = possibleCCL;
+      }
+    }
+  });
+
+  const hi = rows.findIndex(r => r.some(c => /s[íi]mbolo|symbol/i.test(c)));
+  if (hi < 0) throw new Error('No se encontró columna "Símbolo".');
+
+  const hdr = rows[hi];
+  function colIdx(keywords) {
+    return hdr.findIndex(h => keywords.some(k => h.toLowerCase().includes(k.toLowerCase())));
+  }
+
+  const iSym   = colIdx(['símbolo','simbolo','symbol']);
+  const iAct   = colIdx(['activo','nombre','name']);
+  const iCed   = colIdx(['cant.activos','cant.','cantidad','cedears']);
+  const iPC    = colIdx(['precio actual']);
+  const iPCom  = colIdx(['precio compra']);
+  const iSaldo = colIdx(['saldo actual']);
+  const iMonto = colIdx(['monto compra','costo']);
+  const iWL    = colIdx(['win/loss %','win/loss','ganancia','resultado']);
+  const iPct   = colIdx(['win/loss %']);
+  const iUSD   = colIdx(['saldo usd','usd']);
+
+  const iWLars = hdr.findIndex(h => /win\/loss$/i.test(h.trim()));
+  const iWLpct = hdr.findIndex(h => /win\/loss\s*%/i.test(h.trim()));
+
+  const dataRows = rows.slice(hi + 1).filter(r => {
+    const sym = (r[iSym] || '').trim();
+    const tipo = (r[colIdx(['tipo'])] || '').trim().toLowerCase();
+    return sym.length >= 2 && sym.length <= 6 && /^[A-Za-z]/.test(sym) && tipo === 'cedear';
+  });
+
+  if (dataRows.length < 1) throw new Error('No se encontraron posiciones CEDEAR.');
+
+  const get = (r, i) => (i >= 0 && i < r.length) ? (r[i] || '') : '';
+
+  const pos = dataRows.map((r) => {
+    const symbol       = get(r, iSym).trim();
+    const activo       = get(r, iAct).trim();
+    const cedears      = parseNum(get(r, iCed));
+    const precioCedear = parseNum(get(r, iPC));
+    const precioCompra = parseNum(get(r, iPCom));
+    const saldoActual  = parseNum(get(r, iSaldo));
+    const montoCompra  = parseNum(get(r, iMonto));
+    const winLoss      = parseNum(get(r, iWLars >= 0 ? iWLars : iWL));
+    const pctVal       = parsePct(get(r, iWLpct >= 0 ? iWLpct : iPct));
+    const saldoUSD     = parseNum(get(r, iUSD));
+    return { symbol, activo, cedears, precioCedear, precioCompra, saldoActual, montoCompra, winLoss, pct: pctVal, saldoUSD, dist: 0 };
+  });
+
+  const totalPesos = pos.reduce((s, p) => s + p.saldoActual, 0);
+  pos.forEach(p => { if (totalPesos) p.dist = (p.saldoActual / totalPesos) * 100; });
+
+  const totalInv = pos.reduce((s, p) => s + p.montoCompra, 0);
+  const summaryOut = {
+    invertido:   sumInv   || totalInv,
+    saldoPesos:  sumSaldo  || totalPesos,
+    resultado:   sumRes    || (totalPesos - totalInv),
+    rendimiento: sumRend   || (totalInv ? (totalPesos - totalInv) / totalInv * 100 : 0),
+    saldoUSD:    sumUSD    || pos.reduce((s, p) => s + p.saldoUSD, 0)
+  };
+
+  return { positions: pos, summary: summaryOut, ccl };
+}
+
+async function fetchLive() {
   setStatus('loading');
   document.getElementById('error-box').style.display = 'none';
   try {
-    const raw = await fetchCSV(url);
-    const rows = parseCSV(raw);
+    const raw = await fetchCSV('lista de seguimiento');
+    const { positions: pos, summary: sum, ccl } = parseSheetData(raw);
 
-    // ── 1. Leer resumen + CCL ─────────────────────────────────────────────
-    // FIX 1: Saldo USD: columna real es D (r[3]), no C (r[2]).
-    // FIX 2: CCL: actualizarCCL() escribe en H1 → fila 1 (idx 0), columna H (índice 7).
-    let sumInv = 0, sumSaldo = 0, sumRes = 0, sumRend = 0, sumUSD = 0;
-    rows.forEach((r, idx) => {
-      const lbl = (r[0]||'').trim().toLowerCase();
-      if (/^invertido/.test(lbl))     sumInv   = parseNum(r[2]);
-      if (/^saldo\s*pesos/.test(lbl)) sumSaldo  = parseNum(r[2]);
-      if (/^resultado/.test(lbl))     sumRes    = parseNum(r[2]);
-      if (/^rendimiento/.test(lbl))   sumRend   = parsePct(r[2]);
-      if (/^saldo\s*usd/.test(lbl))   sumUSD    = parseNum(r[3]);
+    if (!Object.keys(colorMap).length) pos.forEach((p, i) => colorMap[p.symbol] = i);
 
-      if (idx === 0) {
-        // CCL viene como "1555,2" (con coma decimal) — normalizar antes de parsear
-        var rawCCL = String(r[7] || '').replace(/['"]/g, '').trim().replace(',', '.');
-        var possibleCCL = parseFloat(rawCCL);
-        if (!isNaN(possibleCCL) && possibleCCL > 500 && possibleCCL < 5000) {
-          cclValue = possibleCCL;
-        }
-      }
-    });
+    positions = pos;
+    summary = sum;
 
-    const hi = rows.findIndex(r => r.some(c => /s[íi]mbolo|symbol/i.test(c)));
-    if (hi < 0) throw new Error('No se encontró columna "Símbolo".');
-
-    const hdr = rows[hi];
-    function colIdx(keywords) {
-      return hdr.findIndex(h => keywords.some(k => h.toLowerCase().includes(k.toLowerCase())));
-    }
-
-    const iSym   = colIdx(['símbolo','simbolo','symbol']);
-    const iAct   = colIdx(['activo','nombre','name']);
-    const iCed   = colIdx(['cant.activos','cant.','cantidad','cedears']);
-    const iPC    = colIdx(['precio actual']);
-    const iPCom  = colIdx(['precio compra']);
-    const iSaldo = colIdx(['saldo actual']);
-    const iMonto = colIdx(['monto compra','costo']);
-    const iWL    = colIdx(['win/loss %','win/loss','ganancia','resultado']);
-    const iPct   = colIdx(['win/loss %']);
-    const iUSD   = colIdx(['saldo usd','usd']);
-    const iDist  = colIdx(['distribucion','distribución','dist']);
-
-    const iWLars = hdr.findIndex(h => /win\/loss$/i.test(h.trim()));
-    const iWLpct = hdr.findIndex(h => /win\/loss\s*%/i.test(h.trim()));
-
-    const dataRows = rows.slice(hi + 1).filter(r => {
-      const sym = (r[iSym] || '').trim();
-      const tipo = (r[colIdx(['tipo'])] || '').trim().toLowerCase();
-      return sym.length >= 2 && sym.length <= 6 && /^[A-Za-z]/.test(sym) && tipo === 'cedear';
-    });
-
-    if (dataRows.length < 1) throw new Error('No se encontraron posiciones CEDEAR.');
-
-    const get = (r, i) => (i >= 0 && i < r.length) ? (r[i] || '') : '';
-
-    const newPos = dataRows.map((r) => {
-      const symbol       = get(r, iSym).trim();
-      const activo       = get(r, iAct).trim();
-      const cedears      = parseNum(get(r, iCed));
-      const precioCedear = parseNum(get(r, iPC));
-      const precioCompra = parseNum(get(r, iPCom));
-      const saldoActual  = parseNum(get(r, iSaldo));
-      const montoCompra  = parseNum(get(r, iMonto));
-      const winLoss      = parseNum(get(r, iWLars >= 0 ? iWLars : iWL));
-      const pctVal       = parsePct(get(r, iWLpct >= 0 ? iWLpct : iPct));
-      const saldoUSD     = parseNum(get(r, iUSD));
-      const dist         = parsePct(get(r, iDist));
-      return { symbol, activo, cedears, precioCedear, precioCompra, saldoActual, montoCompra, winLoss, pct: pctVal, saldoUSD, dist };
-    });
-
-    const totalPesos = newPos.reduce((s, p) => s + p.saldoActual, 0);
-    // FIX 3: la columna "Distribución" del sheet viene como fracción decimal
-    // (formato % de Google Sheets exporta 0.091, no 9.1), así que ese dato
-    // nunca es confiable. Recalculamos siempre el porcentaje real a partir
-    // de saldoActual, que sí está bien parseado.
-    newPos.forEach(p => { if (totalPesos) p.dist = (p.saldoActual / totalPesos) * 100; });
-
-    if (!Object.keys(colorMap).length) newPos.forEach((p, i) => colorMap[p.symbol] = i);
-
-    positions = newPos;
-    const totalInv = newPos.reduce((s, p) => s + p.montoCompra, 0);
-    summary = {
-      invertido:   sumInv   || totalInv,
-      saldoPesos:  sumSaldo  || totalPesos,
-      resultado:   sumRes    || (totalPesos - totalInv),
-      rendimiento: sumRend   || (totalInv ? (totalPesos - totalInv) / totalInv * 100 : 0),
-      saldoUSD:    sumUSD    || newPos.reduce((s, p) => s + p.saldoUSD, 0)
-    };
-
-    if (cclValue > 0) {
+    if (ccl > 0) {
+      cclValue = ccl;
       document.getElementById('ccl-input').value = cclValue;
       document.getElementById('ccl-display').textContent = fARS(cclValue).replace('$\u202F','$ ');
     }
@@ -407,6 +423,20 @@ async function fetchLive(url) {
     document.getElementById('error-box').style.display = '';
     document.getElementById('error-box').textContent = '❌ ' + e.message;
     setStatus('error');
+  }
+}
+
+async function fetchAguinaldo() {
+  try {
+    const raw = await fetchCSV('Aguinaldo');
+    const { positions: pos, summary: sum } = parseSheetData(raw);
+    if (!Object.keys(colorMapAg).length) pos.forEach((p, i) => colorMapAg[p.symbol] = i);
+    positionsAg = pos;
+    summaryAg = sum;
+    renderAguinaldo();
+    recalcPatrimonio();
+  } catch(e) {
+    console.error('Aguinaldo: ' + e.message);
   }
 }
 
@@ -435,7 +465,7 @@ async function fetchCripto() {
   try {
     const ids = CRIPTO_HOLDINGS.map(h => h.id).join(',');
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    const res = await fetchWithTimeout(url, 10000);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const prices = await res.json();
     let total = 0;
@@ -483,7 +513,8 @@ function recalcPatrimonio() {
   document.getElementById('balanz-saldo').textContent   = balanzARS > 0 ? fARS(balanzARS) : '—';
 
   const cedarSaldo = summary.saldoPesos || 0;
-  const total = cedarSaldo + xomARS + sneboARS + criptoARS + balanzARS;
+  const agSaldo = summaryAg.saldoPesos || 0;
+  const total = cedarSaldo + agSaldo + xomARS + sneboARS + criptoARS + balanzARS;
   const totalUSD = ccl > 0 ? total / ccl : 0;
 
   document.getElementById('pat-total').textContent = total > 0 ? fARS(total) : '—';
@@ -498,7 +529,7 @@ function setStatus(s) {
   else if (s === 'error') { el.className = 'header-sub'; el.style.color = '#f87171'; el.textContent = '🔴 Error al cargar'; }
 }
 
-function doRefresh() { colorMap = {}; fetchLive(currentUrl); }
+function doRefresh() { colorMap = {}; colorMapAg = {}; fetchLive(); fetchAguinaldo(); }
 
 function sortBy(k) { if (sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=-1; } renderTable(); }
 function getSorted() {
@@ -522,8 +553,9 @@ function fPct(n, sign=true) {
   return (sign && n >= 0 ? '+' : '') + n.toFixed(2) + '%';
 }
 function pctBadge(n) { return `<span class="pct-badge ${n>=0?'pos':'neg'}">${fPct(n)}</span>`; }
-function symBadge(sym) {
-  const ci = colorMap[sym] !== undefined ? colorMap[sym] : 0;
+function symBadge(sym, map) {
+  const m = map || colorMap;
+  const ci = m[sym] !== undefined ? m[sym] : 0;
   return `<span class="sym" style="background:${COLORS[ci % COLORS.length]}">${sym}</span>`;
 }
 
@@ -566,6 +598,36 @@ function renderTable() {
   const wins = positions.filter(p => p.pct > 0).length;
   const loss = positions.filter(p => p.pct < 0).length;
   document.getElementById('pos-count').textContent = `${positions.length} posiciones · ${wins}▲ ${loss}▼`;
+}
+
+function renderAguinaldo() {
+  const s = summaryAg;
+  document.getElementById('ag-invertido').textContent = fARS(s.invertido);
+  document.getElementById('ag-saldo').textContent = fARS(s.saldoPesos);
+  const rEl = document.getElementById('ag-resultado');
+  rEl.textContent = fARS(s.resultado, true);
+  rEl.className = 'card-val ' + (s.resultado >= 0 ? 'pos' : 'neg');
+  const rnEl = document.getElementById('ag-rend');
+  rnEl.textContent = fPct(s.rendimiento);
+  rnEl.className = 'card-val ' + (s.rendimiento >= 0 ? 'pos' : 'neg');
+  document.getElementById('ag-usd').textContent = fUSD(s.saldoUSD);
+
+  document.getElementById('ag-tbody').innerHTML = positionsAg.map((p, i) => {
+    const wl = p.winLoss >= 0 ? 'pos' : 'neg';
+    return `<tr class="${i%2===0?'even':'odd'}">
+      <td class="left">${symBadge(p.symbol, colorMapAg)}</td>
+      <td class="left" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#94a3b8" title="${p.activo}">${p.activo}</td>
+      <td class="dimmed">${p.cedears}</td>
+      <td style="color:#cbd5e1;font-weight:500">${fARS(p.precioCedear)}</td>
+      <td class="dimmed">${fARS(p.precioCompra)}</td>
+      <td class="bright">${fARS(p.saldoActual)}</td>
+      <td class="dimmed">${fARS(p.montoCompra)}</td>
+      <td class="${wl}">${p.winLoss>=0?'+':''}${fARS(p.winLoss)}</td>
+      <td>${pctBadge(p.pct)}</td>
+      <td style="color:#94a3b8">${fUSD(p.saldoUSD)}</td>
+      <td style="color:#64748b;font-size:11px">${p.dist.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
 }
 
 function renderDonut() {
@@ -627,18 +689,17 @@ function togglePanel() {
   document.getElementById('connect-panel').style.display = panelOpen ? '' : 'none';
 }
 async function handleConnect() {
-  const val = document.getElementById('url-input').value.trim();
-  if (!val) return;
-  currentUrl = val; colorMap = {};
+  // Nota: el botón "Sheets" queda para referencia visual, pero ahora la
+  // fuente de datos es siempre el Apps Script (con ?sheet=...), no una URL
+  // de publicación CSV directa. Si en algún momento querés volver a apuntar
+  // a otra hoja distinta, decime y lo adaptamos.
   togglePanel();
-  await fetchLive(val);
-  if (window._ar) clearInterval(window._ar);
-  window._ar = setInterval(() => fetchLive(currentUrl), 5*60*1000);
 }
 
-fetchLive(DEFAULT_URL);
+fetchLive();
+fetchAguinaldo();
 fetchCripto();
-window._ar = setInterval(() => fetchLive(currentUrl), 5*60*1000);
+window._ar = setInterval(() => { fetchLive(); fetchAguinaldo(); }, 5*60*1000);
 setInterval(() => fetchCripto(), 15*60*1000);
 </script>
 </body>
