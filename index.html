@@ -437,6 +437,11 @@ async function fetchAguinaldo() {
     recalcPatrimonio();
   } catch(e) {
     console.error('Aguinaldo: ' + e.message);
+    document.getElementById('ag-invertido').textContent = 'error';
+    document.getElementById('ag-tbody').innerHTML =
+      `<tr><td colspan="11" style="color:#f87171;text-align:center;padding:14px">
+        ❌ ${e.message} — revisá que la hoja se llame exactamente "Aguinaldo" y que hayas redesplegado el Apps Script como Nueva versión.
+      </td></tr>`;
   }
 }
 
@@ -529,7 +534,7 @@ function setStatus(s) {
   else if (s === 'error') { el.className = 'header-sub'; el.style.color = '#f87171'; el.textContent = '🔴 Error al cargar'; }
 }
 
-function doRefresh() { colorMap = {}; colorMapAg = {}; fetchLive(); fetchAguinaldo(); }
+function doRefresh() { colorMap = {}; colorMapAg = {}; cargarTodo(); }
 
 function sortBy(k) { if (sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=-1; } renderTable(); }
 function getSorted() {
@@ -696,10 +701,14 @@ async function handleConnect() {
   togglePanel();
 }
 
-fetchLive();
-fetchAguinaldo();
+async function cargarTodo() {
+  await fetchLive();
+  await fetchAguinaldo();
+}
+
+cargarTodo();
 fetchCripto();
-window._ar = setInterval(() => { fetchLive(); fetchAguinaldo(); }, 5*60*1000);
+window._ar = setInterval(() => { cargarTodo(); }, 5*60*1000);
 setInterval(() => fetchCripto(), 15*60*1000);
 </script>
 </body>
