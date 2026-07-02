@@ -218,13 +218,21 @@
     <div class="card"><div class="card-label">Valuación USD</div><div class="card-val neutral" id="ag-usd">—</div><div class="card-sub">saldo en dólares</div></div>
   </div>
   <div class="table-wrap">
-    <div class="table-head"><span>Posiciones Aguinaldo</span><small>XLP · XLU · XLY</small></div>
+    <div class="table-head"><span>Posiciones Aguinaldo</span><small>Clic en columna para ordenar</small></div>
     <div class="table-scroll">
       <table>
         <thead><tr>
-          <th class="left">Ticker</th><th class="left" style="min-width:180px">Activo</th>
-          <th>Cant.</th><th>$ actual</th><th>$ compra</th><th>Saldo ARS</th>
-          <th>Costo ARS</th><th>G/P ARS</th><th>G/P %</th><th>USD</th><th>Dist.</th>
+          <th class="left" onclick="sortByAg('symbol')">Ticker</th>
+          <th class="left" style="min-width:180px">Activo</th>
+          <th onclick="sortByAg('cedears')">Cant.</th>
+          <th onclick="sortByAg('precioCedear')">$ actual</th>
+          <th onclick="sortByAg('precioCompra')">$ compra</th>
+          <th onclick="sortByAg('saldoActual')">Saldo ARS</th>
+          <th onclick="sortByAg('montoCompra')">Costo ARS</th>
+          <th onclick="sortByAg('winLoss')">G/P ARS</th>
+          <th onclick="sortByAg('pct')">G/P %</th>
+          <th onclick="sortByAg('saldoUSD')">USD</th>
+          <th onclick="sortByAg('dist')">Dist.</th>
         </tr></thead>
         <tbody id="ag-tbody"></tbody>
       </table>
@@ -250,7 +258,7 @@ const DEFAULT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnhIdGSvBx
 const COLORS = ["#6366f1","#8b5cf6","#22d3ee","#3b82f6","#10b981","#f59e0b","#ef4444","#ec4899","#84cc16","#f97316","#a78bfa"];
 
 let positions = [], summary = {}, sortKey = 'saldoActual', sortDir = -1;
-let positionsAg = [], summaryAg = {}, colorMapAg = {};
+let positionsAg = [], summaryAg = {}, colorMapAg = {}, sortKeyAg = 'saldoActual', sortDirAg = -1;
 let currentUrl = DEFAULT_URL, lastUpdate = null, colorMap = {};
 let cclValue = 0;
 
@@ -536,11 +544,19 @@ function setStatus(s) {
 
 function doRefresh() { colorMap = {}; colorMapAg = {}; cargarTodo(); }
 
-function sortBy(k) { if (sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=-1; } renderTable(); }
+function sortBy(k) { if (sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=-1; } renderTable(); renderDonut(); }
 function getSorted() {
   return [...positions].sort((a, b) => {
     const av = a[sortKey], bv = b[sortKey];
     return typeof av === 'number' ? (av - bv) * sortDir : String(av).localeCompare(String(bv)) * sortDir;
+  });
+}
+
+function sortByAg(k) { if (sortKeyAg===k) sortDirAg=-sortDirAg; else { sortKeyAg=k; sortDirAg=-1; } renderAguinaldo(); }
+function getSortedAg() {
+  return [...positionsAg].sort((a, b) => {
+    const av = a[sortKeyAg], bv = b[sortKeyAg];
+    return typeof av === 'number' ? (av - bv) * sortDirAg : String(av).localeCompare(String(bv)) * sortDirAg;
   });
 }
 
@@ -617,7 +633,8 @@ function renderAguinaldo() {
   rnEl.className = 'card-val ' + (s.rendimiento >= 0 ? 'pos' : 'neg');
   document.getElementById('ag-usd').textContent = fUSD(s.saldoUSD);
 
-  document.getElementById('ag-tbody').innerHTML = positionsAg.map((p, i) => {
+  const sortedAg = getSortedAg();
+  document.getElementById('ag-tbody').innerHTML = sortedAg.map((p, i) => {
     const wl = p.winLoss >= 0 ? 'pos' : 'neg';
     return `<tr class="${i%2===0?'even':'odd'}">
       <td class="left">${symBadge(p.symbol, colorMapAg)}</td>
