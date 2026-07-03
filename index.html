@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0e1520; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; }
+  body { background: #1b1d22; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; }
   .root { padding: 20px 22px 32px; max-width: 1400px; margin: 0 auto; }
   .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 12px; }
   .header-left h1 { font-size: 21px; font-weight: 800; color: #f1f5f9; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
@@ -15,22 +15,22 @@
   .btn { border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: opacity 0.15s; }
   .btn:hover { opacity: 0.85; }
   .btn-primary { background: #6366f1; color: #fff; }
-  .btn-ghost { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; font-weight: 400; }
+  .btn-ghost { background: #2b2e35; border: 1px solid #454952; color: #cbd5e1; font-weight: 400; }
   .btn-success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; font-weight: 400; }
   .btn-sm { padding: 6px 11px; font-size: 12px; }
   .hbtns { display: flex; gap: 8px; flex-shrink: 0; }
-  .panel { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  .panel { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
   .panel h3 { font-size: 14px; font-weight: 700; color: #60a5fa; margin-bottom: 8px; }
   .panel p { font-size: 13px; color: #cbd5e1; line-height: 1.7; margin-bottom: 12px; }
   .panel p strong { color: #f1f5f9; }
   .panel p em { color: #93c5fd; font-style: normal; font-weight: 600; }
   .url-row { display: flex; gap: 8px; }
-  .url-input { flex: 1; background: #0d1a2e; border: 1px solid #1e3a5f; border-radius: 8px; padding: 10px 13px; color: #e2e8f0; font-size: 13px; outline: none; }
+  .url-input { flex: 1; background: #212329; border: 1px solid #3a3e46; border-radius: 8px; padding: 10px 13px; color: #e2e8f0; font-size: 13px; outline: none; }
   .url-input::placeholder { color: #64748b; }
   .error-box { margin-top: 10px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 10px 13px; font-size: 13px; color: #f87171; }
   .section-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
   .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 8px; }
-  .card { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; padding: 15px 16px; }
+  .card { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; padding: 15px 16px; }
   .card-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; margin-bottom: 7px; }
   .card-val { font-size: 19px; font-weight: 800; line-height: 1.1; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
   .card-val.neutral { color: #f1f5f9; }
@@ -39,35 +39,35 @@
   .card-sub { font-size: 11px; color: #94a3b8; }
   .patrimonio-section { margin-bottom: 18px; }
   .patrimonio-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
-  .card-patrimonio { background: #0f1e35; border: 1px solid #1e4a6e; border-radius: 12px; padding: 15px 16px; position: relative; overflow: hidden; }
+  .card-patrimonio { background: #26292f; border: 1px solid #3f434c; border-radius: 12px; padding: 15px 16px; position: relative; overflow: hidden; }
   .card-patrimonio::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, #3b82f6, #6366f1); }
   .card-patrimonio .card-label { color: #7eb8d4; }
   .card-patrimonio .card-val { font-size: 17px; color: #bfdbfe; }
   .card-patrimonio .card-sub { color: #6ea8c8; }
-  .card-patrimonio.total { background: #0d1f38; border-color: #2563eb; }
+  .card-patrimonio.total { background: #2a2d33; border-color: #2563eb; }
   .card-patrimonio.total::before { background: linear-gradient(90deg, #2563eb, #7c3aed); }
   .card-patrimonio.total .card-val { color: #93c5fd; font-size: 20px; }
-  .pat-input { background: #0d1a2e; border: 1px solid #1e3a5f; border-radius: 6px; padding: 4px 8px; color: #bfdbfe; font-size: 14px; font-weight: 700; width: 100%; margin-top: 4px; outline: none; font-variant-numeric: tabular-nums; }
+  .pat-input { background: #212329; border: 1px solid #3a3e46; border-radius: 6px; padding: 4px 8px; color: #bfdbfe; font-size: 14px; font-weight: 700; width: 100%; margin-top: 4px; outline: none; font-variant-numeric: tabular-nums; }
   .pat-input:focus { border-color: #3b82f6; }
   .pat-hint { font-size: 10px; color: #64748b; margin-top: 3px; }
   .balanz-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
   .balanz-row label { font-size: 9.5px; color: #7eb8d4; flex: 1; line-height: 1.2; }
-  .balanz-row input { width: 64px; background: #0d1a2e; border: 1px solid #1e3a5f; border-radius: 5px; padding: 3px 5px; color: #bfdbfe; font-size: 12px; font-weight: 700; outline: none; text-align: right; }
+  .balanz-row input { width: 64px; background: #212329; border: 1px solid #3a3e46; border-radius: 5px; padding: 3px 5px; color: #bfdbfe; font-size: 12px; font-weight: 700; outline: none; text-align: right; }
   .balanz-row input:focus { border-color: #3b82f6; }
-  .table-wrap { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
-  .table-head { padding: 13px 18px; border-bottom: 1px solid #1e3a5f; display: flex; justify-content: space-between; align-items: center; }
+  .table-wrap { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
+  .table-head { padding: 13px 18px; border-bottom: 1px solid #3a3e46; display: flex; justify-content: space-between; align-items: center; }
   .table-head span { font-size: 13px; font-weight: 700; color: #e2e8f0; }
   .table-head small { font-size: 11px; color: #475569; }
   .table-scroll { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead tr { background: #0e1520; }
+  thead tr { background: #1b1d22; }
   thead th { padding: 9px 12px; text-align: right; font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; cursor: pointer; user-select: none; transition: color 0.15s; }
   thead th:hover { color: #818cf8; }
   thead th.left { text-align: left; }
-  tbody tr { border-top: 1px solid #1a2d3e; transition: background 0.1s; }
+  tbody tr { border-top: 1px solid #33363d; transition: background 0.1s; }
   tbody tr:hover { background: #1a2d45 !important; }
   tbody tr.even { background: transparent; }
-  tbody tr.odd { background: #162540; }
+  tbody tr.odd { background: #2b2e35; }
   td { padding: 10px 12px; text-align: right; vertical-align: middle; }
   td.left { text-align: left; }
   td.dimmed { color: #94a3b8; }
@@ -79,7 +79,7 @@
   .pct-badge.pos { background: rgba(52,211,153,0.12); color: #34d399; }
   .pct-badge.neg { background: rgba(248,113,113,0.12); color: #f87171; }
   .bottom { display: grid; grid-template-columns: 240px 1fr; gap: 14px; }
-  .chart-box { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; padding: 16px; }
+  .chart-box { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; padding: 16px; }
   .chart-box h4 { font-size: 13px; font-weight: 700; color: #e2e8f0; margin-bottom: 10px; }
   .donut-svg { display: block; margin: 0 auto; }
   .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 10px; margin-top: 10px; }
@@ -87,16 +87,16 @@
   .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .legend-pct { margin-left: auto; color: #64748b; }
   .rankings { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .rank-box { background: #162032; border: 1px solid #1e3a5f; border-radius: 12px; padding: 16px; }
+  .rank-box { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; padding: 16px; }
   .rank-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
   .rank-box h4.green { color: #34d399; }
   .rank-box h4.red { color: #f87171; }
-  .rank-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1a2d3e; }
+  .rank-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #33363d; }
   .rank-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
   .rank-amt { font-size: 11px; color: #94a3b8; }
   .dist-cell { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
   .dist-bar { height: 3px; border-radius: 2px; min-width: 3px; }
-  .divider { border: none; border-top: 1px solid #1e3a5f; margin: 14px 0 16px; }
+  .divider { border: none; border-top: 1px solid #3a3e46; margin: 14px 0 16px; }
   @media (max-width: 1100px) { .patrimonio-grid { grid-template-columns: repeat(3, 1fr); } }
 </style>
 </head>
@@ -166,7 +166,7 @@
         <div class="card-val" id="cripto-saldo">—</div>
         <div class="card-sub">saldo en ARS</div>
         <div style="margin-top:8px; display:flex; gap:6px; align-items:center;"><button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px" onclick="fetchCripto()">↻ actualizar</button></div>
-        <div style="font-size:10px;color:#334155;margin-top:5px" id="cripto-status">no cargado</div>
+        <div style="font-size:10px;color:#454952;margin-top:5px" id="cripto-status">no cargado</div>
       </div>
       <div class="card-patrimonio">
         <div class="card-label">💵 Fondos Balanz (saldo USD)</div>
@@ -386,7 +386,13 @@ function parseSheetData(raw) {
     const saldoActual  = parseNum(get(r, iSaldo));
     const montoCompra  = parseNum(get(r, iMonto));
     const winLoss      = parseNum(get(r, iWLars >= 0 ? iWLars : iWL));
-    const pctVal        = parsePct(get(r, iWLpct >= 0 ? iWLpct : iPct));
+    // FIX: en vez de confiar en el parseo de la celda de texto "G/P %"
+    // (que puede venir con o sin el símbolo "%" según cómo Sheets/Apps Script
+    // serializa el valor, causando el bug de mostrar 0.12% en vez de 12.31%),
+    // el porcentaje se calcula directamente a partir de saldoActual y montoCompra,
+    // que son valores numéricos ya confiables. Aplica tanto a CEDEARs como a Aguinaldo
+    // porque ambas tablas usan esta misma función.
+    const pctVal        = montoCompra ? ((saldoActual - montoCompra) / montoCompra) * 100 : 0;
     const saldoUSD     = parseNum(get(r, iUSD));
     return { symbol, activo, cedears, precioCedear, precioCompra, saldoActual, montoCompra, winLoss, pct: pctVal, saldoUSD, dist: 0 };
   });
@@ -399,7 +405,10 @@ function parseSheetData(raw) {
     invertido:   sumInv   || totalInv,
     saldoPesos:  sumSaldo  || totalPesos,
     resultado:   sumRes    || (totalPesos - totalInv),
-    rendimiento: sumRend   || (totalInv ? (totalPesos - totalInv) / totalInv * 100 : 0),
+    // FIX: mismo criterio que arriba — calcular directo de totalPesos/totalInv
+    // en vez de depender de parsePct() sobre la celda de texto "Rendimiento",
+    // para que la card de resumen no pueda desincronizarse de la tabla.
+    rendimiento: totalInv ? (totalPesos - totalInv) / totalInv * 100 : 0,
     saldoUSD:    sumUSD    || pos.reduce((s, p) => s + p.saldoUSD, 0)
   };
 
@@ -698,7 +707,7 @@ function renderDonut() {
     const path = document.createElementNS(svgNS, 'path');
     path.setAttribute('d', d);
     path.setAttribute('fill', color);
-    path.setAttribute('stroke', '#0e1520');
+    path.setAttribute('stroke', '#1b1d22');
     path.setAttribute('stroke-width', '1.5');
     path.setAttribute('opacity', '0.9');
     svg.appendChild(path);
