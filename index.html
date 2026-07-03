@@ -191,18 +191,18 @@
     <div class="table-head"><span>Posiciones CEDEARs</span><small>Clic en columna para ordenar</small></div>
     <div class="table-scroll">
       <table>
-        <thead><tr>
-          <th class="left" onclick="sortBy('symbol')">Ticker</th>
+        <thead><tr id="pos-table-head">
+          <th class="left" data-key="symbol" data-label="Ticker" onclick="sortBy('symbol')">Ticker</th>
           <th class="left" style="min-width:180px">Activo</th>
-          <th onclick="sortBy('cedears')">Cant.</th>
-          <th onclick="sortBy('precioCedear')">$ actual</th>
-          <th onclick="sortBy('precioCompra')">$ compra</th>
-          <th onclick="sortBy('saldoActual')">Saldo ARS</th>
-          <th onclick="sortBy('montoCompra')">Costo ARS</th>
-          <th onclick="sortBy('winLoss')">G/P ARS</th>
-          <th onclick="sortBy('pct')">G/P %</th>
-          <th onclick="sortBy('saldoUSD')">USD</th>
-          <th onclick="sortBy('dist')">Dist.</th>
+          <th data-key="cedears" data-label="Cant." onclick="sortBy('cedears')">Cant.</th>
+          <th data-key="precioCedear" data-label="$ actual" onclick="sortBy('precioCedear')">$ actual</th>
+          <th data-key="precioCompra" data-label="$ compra" onclick="sortBy('precioCompra')">$ compra</th>
+          <th data-key="saldoActual" data-label="Saldo ARS" onclick="sortBy('saldoActual')">Saldo ARS</th>
+          <th data-key="montoCompra" data-label="Costo ARS" onclick="sortBy('montoCompra')">Costo ARS</th>
+          <th data-key="winLoss" data-label="G/P ARS" onclick="sortBy('winLoss')">G/P ARS</th>
+          <th data-key="pct" data-label="G/P %" onclick="sortBy('pct')">G/P %</th>
+          <th data-key="saldoUSD" data-label="USD" onclick="sortBy('saldoUSD')">USD</th>
+          <th data-key="dist" data-label="Dist." onclick="sortBy('dist')">Dist.</th>
         </tr></thead>
         <tbody id="pos-tbody"></tbody>
       </table>
@@ -221,18 +221,18 @@
     <div class="table-head"><span>Posiciones Aguinaldo</span><small>Clic en columna para ordenar</small></div>
     <div class="table-scroll">
       <table>
-        <thead><tr>
-          <th class="left" onclick="sortByAg('symbol')">Ticker</th>
+        <thead><tr id="ag-table-head">
+          <th class="left" data-key="symbol" data-label="Ticker" onclick="sortByAg('symbol')">Ticker</th>
           <th class="left" style="min-width:180px">Activo</th>
-          <th onclick="sortByAg('cedears')">Cant.</th>
-          <th onclick="sortByAg('precioCedear')">$ actual</th>
-          <th onclick="sortByAg('precioCompra')">$ compra</th>
-          <th onclick="sortByAg('saldoActual')">Saldo ARS</th>
-          <th onclick="sortByAg('montoCompra')">Costo ARS</th>
-          <th onclick="sortByAg('winLoss')">G/P ARS</th>
-          <th onclick="sortByAg('pct')">G/P %</th>
-          <th onclick="sortByAg('saldoUSD')">USD</th>
-          <th onclick="sortByAg('dist')">Dist.</th>
+          <th data-key="cedears" data-label="Cant." onclick="sortByAg('cedears')">Cant.</th>
+          <th data-key="precioCedear" data-label="$ actual" onclick="sortByAg('precioCedear')">$ actual</th>
+          <th data-key="precioCompra" data-label="$ compra" onclick="sortByAg('precioCompra')">$ compra</th>
+          <th data-key="saldoActual" data-label="Saldo ARS" onclick="sortByAg('saldoActual')">Saldo ARS</th>
+          <th data-key="montoCompra" data-label="Costo ARS" onclick="sortByAg('montoCompra')">Costo ARS</th>
+          <th data-key="winLoss" data-label="G/P ARS" onclick="sortByAg('winLoss')">G/P ARS</th>
+          <th data-key="pct" data-label="G/P %" onclick="sortByAg('pct')">G/P %</th>
+          <th data-key="saldoUSD" data-label="USD" onclick="sortByAg('saldoUSD')">USD</th>
+          <th data-key="dist" data-label="Dist." onclick="sortByAg('dist')">Dist.</th>
         </tr></thead>
         <tbody id="ag-tbody"></tbody>
       </table>
@@ -300,8 +300,6 @@ function parseCSV(text) {
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfdEiUw-GsiEZoC4nLafd745zxCyRJVbxDxqoZeN8nkUPtHu-jFmDw2ThDnZEFhNof/exec';
 
-// Timeout hecho a mano (sin AbortSignal) para evitar errores de "postMessage"
-// en entornos que interceptan fetch a través de un proxy entre ventanas.
 function fetchWithTimeout(url, ms) {
   return Promise.race([
     fetch(url),
@@ -309,7 +307,6 @@ function fetchWithTimeout(url, ms) {
   ]);
 }
 
-// Ahora recibe el nombre de la hoja y se lo manda al Apps Script como parámetro.
 async function fetchCSV(sheetName) {
   const url = APPS_SCRIPT_URL + '?sheet=' + encodeURIComponent(sheetName);
   const res = await fetchWithTimeout(url, 15000);
@@ -320,9 +317,6 @@ async function fetchCSV(sheetName) {
   return txt;
 }
 
-// Parseo genérico: toma el CSV crudo de CUALQUIER hoja (misma estructura de
-// columnas) y devuelve { positions, summary, ccl }. La usan tanto
-// "lista de seguimiento" como "Aguinaldo".
 function parseSheetData(raw) {
   const rows = parseCSV(raw);
 
@@ -360,7 +354,7 @@ function parseSheetData(raw) {
   const iSaldo = colIdx(['saldo actual']);
   const iMonto = colIdx(['monto compra','costo']);
   const iWL    = colIdx(['win/loss %','win/loss','ganancia','resultado']);
-  const iPct   = colIdx(['win/loss %']);
+  const iPct   = colIdx(['win/loss %','% ganancia','ganancia %','rendimiento %','% g/p','g/p %']);
   const iUSD   = colIdx(['saldo usd','usd']);
 
   const iWLars = hdr.findIndex(h => /win\/loss$/i.test(h.trim()));
@@ -369,7 +363,7 @@ function parseSheetData(raw) {
   const dataRows = rows.slice(hi + 1).filter(r => {
     const sym = (r[iSym] || '').trim();
     const tipo = (r[colIdx(['tipo'])] || '').trim().toLowerCase();
-    return sym.length >= 2 && sym.length <= 6 && /^[A-Za-z]/.test(sym) && tipo === 'cedear';
+    return sym.length >= 2 && sym.length <= 6 && /^[A-Za-z]/.test(sym) && (tipo === 'cedear' || tipo === 'bono');
   });
 
   if (dataRows.length < 1) throw new Error('No se encontraron posiciones CEDEAR.');
@@ -385,7 +379,7 @@ function parseSheetData(raw) {
     const saldoActual  = parseNum(get(r, iSaldo));
     const montoCompra  = parseNum(get(r, iMonto));
     const winLoss      = parseNum(get(r, iWLars >= 0 ? iWLars : iWL));
-    const pctVal       = parsePct(get(r, iWLpct >= 0 ? iWLpct : iPct));
+    const pctVal        = parsePct(get(r, iWLpct >= 0 ? iWLpct : iPct));
     const saldoUSD     = parseNum(get(r, iUSD));
     return { symbol, activo, cedears, precioCedear, precioCompra, saldoActual, montoCompra, winLoss, pct: pctVal, saldoUSD, dist: 0 };
   });
@@ -544,19 +538,42 @@ function setStatus(s) {
 
 function doRefresh() { colorMap = {}; colorMapAg = {}; cargarTodo(); }
 
-function sortBy(k) { if (sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=-1; } renderTable(); renderDonut(); }
+function sortBy(k) { if (sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=-1; } renderTable(); renderDonut(); updateSortIndicators(); }
 function getSorted() {
   return [...positions].sort((a, b) => {
     const av = a[sortKey], bv = b[sortKey];
-    return typeof av === 'number' ? (av - bv) * sortDir : String(av).localeCompare(String(bv)) * sortDir;
+    const an = typeof av === 'number' ? av : Number(av);
+    const bn = typeof bv === 'number' ? bv : Number(bv);
+    if (!isNaN(an) && !isNaN(bn)) {
+      if (an === bn) return String(a.symbol).localeCompare(String(b.symbol));
+      return (an - bn) * sortDir;
+    }
+    return String(av).localeCompare(String(bv)) * sortDir;
   });
 }
 
-function sortByAg(k) { if (sortKeyAg===k) sortDirAg=-sortDirAg; else { sortKeyAg=k; sortDirAg=-1; } renderAguinaldo(); }
+function sortByAg(k) { if (sortKeyAg===k) sortDirAg=-sortDirAg; else { sortKeyAg=k; sortDirAg=-1; } renderAguinaldo(); updateSortIndicators(); }
 function getSortedAg() {
   return [...positionsAg].sort((a, b) => {
     const av = a[sortKeyAg], bv = b[sortKeyAg];
-    return typeof av === 'number' ? (av - bv) * sortDirAg : String(av).localeCompare(String(bv)) * sortDirAg;
+    const an = typeof av === 'number' ? av : Number(av);
+    const bn = typeof bv === 'number' ? bv : Number(bv);
+    if (!isNaN(an) && !isNaN(bn)) {
+      if (an === bn) return String(a.symbol).localeCompare(String(b.symbol));
+      return (an - bn) * sortDirAg;
+    }
+    return String(av).localeCompare(String(bv)) * sortDirAg;
+  });
+}
+
+function updateSortIndicators() {
+  document.querySelectorAll('#pos-table-head th[data-key]').forEach(th => {
+    const base = th.getAttribute('data-label');
+    th.textContent = base + (th.getAttribute('data-key') === sortKey ? (sortDir === 1 ? ' ▲' : ' ▼') : '');
+  });
+  document.querySelectorAll('#ag-table-head th[data-key]').forEach(th => {
+    const base = th.getAttribute('data-label');
+    th.textContent = base + (th.getAttribute('data-key') === sortKeyAg ? (sortDirAg === 1 ? ' ▲' : ' ▼') : '');
   });
 }
 
@@ -703,7 +720,7 @@ function renderRankings() {
   document.getElementById('rank-bot').innerHTML = items([...positions].sort((a,b)=>a.pct-b.pct).slice(0,5));
 }
 
-function render() { renderCards(); renderTable(); renderDonut(); renderRankings(); }
+function render() { renderCards(); renderTable(); renderDonut(); renderRankings(); updateSortIndicators(); }
 
 let panelOpen = false;
 function togglePanel() {
@@ -711,10 +728,6 @@ function togglePanel() {
   document.getElementById('connect-panel').style.display = panelOpen ? '' : 'none';
 }
 async function handleConnect() {
-  // Nota: el botón "Sheets" queda para referencia visual, pero ahora la
-  // fuente de datos es siempre el Apps Script (con ?sheet=...), no una URL
-  // de publicación CSV directa. Si en algún momento querés volver a apuntar
-  // a otra hoja distinta, decime y lo adaptamos.
   togglePanel();
 }
 
@@ -730,3 +743,4 @@ setInterval(() => fetchCripto(), 15*60*1000);
 </script>
 </body>
 </html>
+
