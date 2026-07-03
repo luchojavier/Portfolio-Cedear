@@ -275,10 +275,17 @@ function parseNum(s) {
 
 function parsePct(s) {
   if (!s) return 0;
-  s = String(s).replace(/[$`"%\s"]/g, '').trim().replace(/^-\s+/, '-');
-  if (/,\d{1,2}$/.test(s)) s = s.replace(',', '.');
-  const n = parseFloat(s);
-  return isNaN(n) ? 0 : n;
+  const raw = String(s).trim();
+  const hasPercentSign = raw.includes('%');
+  let str = raw.replace(/[$`"%\s"]/g, '').trim().replace(/^-\s+/, '-');
+  if (/,\d{1,2}$/.test(str)) str = str.replace(',', '.');
+  let n = parseFloat(str);
+  if (isNaN(n)) return 0;
+  // Si la celda viene sin signo "%" es porque Sheets exportó el valor crudo
+  // de una celda con formato de porcentaje (ej. 7.03% se exporta como 0.0703).
+  // En ese caso hay que multiplicar por 100 para volver a la escala correcta.
+  if (!hasPercentSign) n = n * 100;
+  return n;
 }
 
 function parseCSV(text) {
@@ -743,4 +750,3 @@ setInterval(() => fetchCripto(), 15*60*1000);
 </script>
 </body>
 </html>
-
