@@ -75,6 +75,7 @@
   td.pos { color: #34d399; font-weight: 700; }
   td.neg { color: #f87171; font-weight: 700; }
   .sym { display: inline-block; border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; color: #fff; white-space: nowrap; }
+  .sym[title] { cursor: help; }
   .pct-badge { display: inline-block; padding: 3px 7px; border-radius: 5px; font-size: 12px; font-weight: 700; white-space: nowrap; }
   .pct-badge.pos { background: rgba(52,211,153,0.12); color: #34d399; }
   .pct-badge.neg { background: rgba(248,113,113,0.12); color: #f87171; }
@@ -607,10 +608,41 @@ function fPct(n, sign=true) {
   return (sign && n >= 0 ? '+' : '') + n.toFixed(2) + '%';
 }
 function pctBadge(n) { return `<span class="pct-badge ${n>=0?'pos':'neg'}">${fPct(n)}</span>`; }
+
+// Descripciones cortas para el tooltip al pasar el mouse sobre el ticker.
+// Si un símbolo no está acá, el tooltip simplemente no aparece (no rompe nada).
+const TICKER_INFO = {
+  IVV:  "iShares Core S&P 500 ETF — las 500 empresas más grandes de EE.UU.",
+  EEM:  "iShares MSCI Emerging Markets ETF — acciones de mercados emergentes (China, India, Brasil, etc.)",
+  EFA:  "iShares MSCI EAFE ETF — acciones de mercados desarrollados fuera de EE.UU./Canadá (Europa, Japón, Australia)",
+  VIG:  "Vanguard Dividend Appreciation ETF — empresas con historial de aumentar dividendos año tras año",
+  RSP:  "Invesco S&P 500 Equal Weight ETF — el S&P 500 pero con el mismo peso para cada empresa (no dominado por las gigantes tech)",
+  XLV:  "Health Care Select Sector SPDR — sector salud de EE.UU. (farmacéuticas, seguros médicos, equipamiento)",
+  XLP:  "Consumer Staples Select Sector SPDR — consumo masivo/defensivo (alimentos, higiene, bebidas)",
+  XLI:  "Industrial Select Sector SPDR — sector industrial (manufactura, transporte, defensa, maquinaria)",
+  XLU:  "Utilities Select Sector SPDR — empresas de energía eléctrica/gas, muy ligado a la demanda de data centers de IA",
+  XLF:  "Financial Select Sector SPDR — bancos, aseguradoras y financieras de EE.UU.",
+  XLE:  "Energy Select Sector SPDR — petroleras y gasíferas de EE.UU.",
+  XLY:  "Consumer Discretionary Select Sector SPDR — consumo no esencial de EE.UU. (retail, autos, ocio, e-commerce)",
+  IVE:  "iShares S&P 500 Value ETF — empresas grandes de EE.UU. con perfil 'value' (más baratas relativo a sus fundamentals)",
+  ITA:  "iShares U.S. Aerospace & Defense ETF — sector aeroespacial y de defensa de EE.UU.",
+  IBIT: "iShares Bitcoin Trust — expone a Bitcoin a través de un ETF listado en bolsa",
+  NOW:  "ServiceNow Inc — software empresarial de gestión de flujos de trabajo (workflow/ITSM)",
+  ADBE: "Adobe Inc — software creativo y de marketing (Photoshop, Premiere, Creative Cloud)",
+  FISV: "Fiserv Inc — procesamiento de pagos y servicios financieros tecnológicos",
+  NVDA: "Nvidia Corp — diseño de GPUs, líder en chips para IA",
+  ANET: "Arista Networks Inc — switches y redes de alta velocidad para data centers",
+  XOM:  "ExxonMobil — una de las mayores petroleras integradas del mundo",
+  SNEBO:"San Miguel — Obligación Negociable (bono corporativo) 2029",
+  AO27: "Bono soberano argentino en dólares, ley Argentina, vencimiento 2027",
+};
+
 function symBadge(sym, map) {
   const m = map || colorMap;
   const ci = m[sym] !== undefined ? m[sym] : 0;
-  return `<span class="sym" style="background:${COLORS[ci % COLORS.length]}">${sym}</span>`;
+  const info = TICKER_INFO[sym];
+  const titleAttr = info ? ` title="${info.replace(/"/g,'&quot;')}"` : '';
+  return `<span class="sym" style="background:${COLORS[ci % COLORS.length]}"${titleAttr}>${sym}</span>`;
 }
 
 function renderCards() {
