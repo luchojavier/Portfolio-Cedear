@@ -145,6 +145,8 @@
         <div class="pat-hint">50 acciones · PPC USD 103</div>
         <div class="card-val" id="xom-saldo" style="margin-top:8px">—</div>
         <div class="card-sub">saldo en ARS</div>
+        <div style="margin-top:8px; display:flex; gap:6px; align-items:center;"><button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px" onclick="fetchXOM()">↻ actualizar</button></div>
+        <div style="font-size:10px;color:#454952;margin-top:5px" id="xom-status">no cargado</div>
       </div>
       <div class="card-patrimonio">
         <div class="card-label">SNEBO · San Miguel ON 2029</div>
@@ -195,6 +197,8 @@
         <thead><tr id="pos-table-head">
           <th class="left" data-key="symbol" data-label="Ticker" onclick="sortBy('symbol')">Ticker</th>
           <th class="left" style="min-width:180px">Activo</th>
+          <th data-key="fechaCompraTs" data-label="Fecha" onclick="sortBy('fechaCompraTs')">Fecha</th>
+          <th data-key="mesesCartera" data-label="Meses" onclick="sortBy('mesesCartera')">Meses</th>
           <th data-key="cedears" data-label="Cant." onclick="sortBy('cedears')">Cant.</th>
           <th data-key="precioCedear" data-label="$ actual" onclick="sortBy('precioCedear')">$ actual</th>
           <th data-key="precioCompra" data-label="$ compra" onclick="sortBy('precioCompra')">$ compra</th>
@@ -225,6 +229,8 @@
         <thead><tr id="ag-table-head">
           <th class="left" data-key="symbol" data-label="Ticker" onclick="sortByAg('symbol')">Ticker</th>
           <th class="left" style="min-width:180px">Activo</th>
+          <th data-key="fechaCompraTs" data-label="Fecha" onclick="sortByAg('fechaCompraTs')">Fecha</th>
+          <th data-key="mesesCartera" data-label="Meses" onclick="sortByAg('mesesCartera')">Meses</th>
           <th data-key="cedears" data-label="Cant." onclick="sortByAg('cedears')">Cant.</th>
           <th data-key="precioCedear" data-label="$ actual" onclick="sortByAg('precioCedear')">$ actual</th>
           <th data-key="precioCompra" data-label="$ compra" onclick="sortByAg('precioCompra')">$ compra</th>
@@ -287,6 +293,35 @@ function parsePct(s) {
   // En ese caso hay que multiplicar por 100 para volver a la escala correcta.
   if (!hasPercentSign) n = n * 100;
   return n;
+}
+
+function parseFechaFlexible(raw) {
+  if (!raw) return null;
+  const str = String(raw).trim();
+  // Formato corto tipo D/M/AAAA o D/M/AA (el habitual del Sheet)
+  const parts = str.split('/');
+  if (parts.length === 3) {
+    const d = parseInt(parts[0], 10), m = parseInt(parts[1], 10);
+    let y = parseInt(parts[2], 10);
+    if (d && m && y) {
+      if (y < 100) y += 2000;
+      const dt = new Date(y, m - 1, d);
+      if (!isNaN(dt.getTime())) return dt;
+    }
+  }
+  // Fallback: si la celda vino como fecha "cruda" de Sheets (ej. "Wed Jul 01 2026 19:00:00 GMT-0300..."),
+  // dejamos que el motor de JS la interprete directamente.
+  const parsed = new Date(str);
+  if (!isNaN(parsed.getTime())) return parsed;
+  return null;
+}
+
+function formatFechaCorta(dateObj) {
+  if (!dateObj) return '';
+  const dd = String(dateObj.getDate()).padStart(2, '0');
+  const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const yy = String(dateObj.getFullYear()).slice(-2);
+  return `${dd}/${mm}/${yy}`;
 }
 
 function parseCSV(text) {
@@ -364,9 +399,15 @@ function parseSheetData(raw) {
   const iWL    = colIdx(['win/loss %','win/loss','ganancia','resultado']);
   const iPct   = colIdx(['win/loss %','% ganancia','ganancia %','rendimiento %','% g/p','g/p %']);
   const iUSD   = colIdx(['saldo usd','usd']);
+  const iFecha = colIdx(['fecha compra','fecha']);
 
   const iWLars = hdr.findIndex(h => /win\/loss$/i.test(h.trim()));
   const iWLpct = hdr.findIndex(h => /win\/loss\s*%/i.test(h.trim()));
+
+  const iTipoIdx = colIdx(['tipo']);
+  const xomRow = rows.slice(hi + 1).find(r => (r[iSym] || '').trim().toUpperCase() === 'XOM');
+  const xomPrice = xomRow ? parseNum(get_(xomRow, iPC)) : 0;
+  function get_(r, i) { return (i >= 0 && i < r.length) ? (r[i] || '') : ''; }
 
   const dataRows = rows.slice(hi + 1).filter(r => {
     const sym = (r[iSym] || '').trim();
@@ -395,7 +436,12 @@ function parseSheetData(raw) {
     // porque ambas tablas usan esta misma función.
     const pctVal        = montoCompra ? ((saldoActual - montoCompra) / montoCompra) * 100 : 0;
     const saldoUSD     = parseNum(get(r, iUSD));
-    return { symbol, activo, cedears, precioCedear, precioCompra, saldoActual, montoCompra, winLoss, pct: pctVal, saldoUSD, dist: 0 };
+    const fechaRaw      = get(r, iFecha).trim();
+    const fechaDateObj  = parseFechaFlexible(fechaRaw);
+    const fechaCompra   = fechaDateObj ? formatFechaCorta(fechaDateObj) : '';
+    const fechaCompraTs = fechaDateObj ? fechaDateObj.getTime() : 0;
+    const mesesCartera  = fechaCompraTs ? (Date.now() - fechaCompraTs) / (1000*60*60*24*30.44) : 0;
+    return { symbol, activo, cedears, precioCedear, precioCompra, saldoActual, montoCompra, winLoss, pct: pctVal, saldoUSD, dist: 0, fechaCompra, fechaCompraTs, mesesCartera };
   });
 
   const totalPesos = pos.reduce((s, p) => s + p.saldoActual, 0);
@@ -413,7 +459,7 @@ function parseSheetData(raw) {
     saldoUSD:    sumUSD    || pos.reduce((s, p) => s + p.saldoUSD, 0)
   };
 
-  return { positions: pos, summary: summaryOut, ccl };
+  return { positions: pos, summary: summaryOut, ccl, xomPrice };
 }
 
 async function fetchLive() {
@@ -421,7 +467,7 @@ async function fetchLive() {
   document.getElementById('error-box').style.display = 'none';
   try {
     const raw = await fetchCSV('lista de seguimiento');
-    const { positions: pos, summary: sum, ccl } = parseSheetData(raw);
+    const { positions: pos, summary: sum, ccl, xomPrice } = parseSheetData(raw);
 
     if (!Object.keys(colorMap).length) pos.forEach((p, i) => colorMap[p.symbol] = i);
 
@@ -432,6 +478,10 @@ async function fetchLive() {
       cclValue = ccl;
       document.getElementById('ccl-input').value = cclValue;
       document.getElementById('ccl-display').textContent = fARS(cclValue).replace('$\u202F','$ ');
+    }
+
+    if (xomPrice > 0) {
+      document.getElementById('xom-precio').value = xomPrice;
     }
 
     lastUpdate = new Date();
@@ -458,7 +508,7 @@ async function fetchAguinaldo() {
     console.error('Aguinaldo: ' + e.message);
     document.getElementById('ag-invertido').textContent = 'error';
     document.getElementById('ag-tbody').innerHTML =
-      `<tr><td colspan="11" style="color:#f87171;text-align:center;padding:14px">
+      `<tr><td colspan="13" style="color:#f87171;text-align:center;padding:14px">
         ❌ ${e.message} — revisá que la hoja se llame exactamente "Aguinaldo" y que hayas redesplegado el Apps Script como Nueva versión.
       </td></tr>`;
   }
@@ -483,6 +533,25 @@ const CRIPTO_HOLDINGS = [
 ];
 
 let criptoTotalUSD = 0;
+
+async function fetchXOM() {
+  const statusEl = document.getElementById('xom-status');
+  statusEl.textContent = '⟳ consultando Yahoo Finance…';
+  try {
+    const yfUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/XOM?interval=1d&range=1d';
+    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(yfUrl);
+    const res = await fetchWithTimeout(proxyUrl, 10000);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (!price) throw new Error('Sin precio en la respuesta');
+    document.getElementById('xom-precio').value = price;
+    statusEl.textContent = '🟢 ' + new Date().toLocaleTimeString('es-AR') + ' · USD ' + price.toFixed(2);
+    recalcPatrimonio();
+  } catch(e) {
+    statusEl.textContent = '🔴 error: ' + e.message + ' (usando último valor)';
+  }
+}
 
 async function fetchCripto() {
   document.getElementById('cripto-status').textContent = '⟳ consultando CoinGecko…';
@@ -667,6 +736,8 @@ function renderTable() {
     return `<tr class="${i%2===0?'even':'odd'}">
       <td class="left">${symBadge(p.symbol)}</td>
       <td class="left" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#94a3b8" title="${p.activo}">${p.activo}</td>
+      <td class="dimmed" style="font-size:12px">${p.fechaCompra || '—'}</td>
+      <td class="dimmed">${p.mesesCartera ? p.mesesCartera.toFixed(1) : '—'}</td>
       <td class="dimmed">${p.cedears}</td>
       <td style="color:#cbd5e1;font-weight:500">${fARS(p.precioCedear)}</td>
       <td class="dimmed">${fARS(p.precioCompra)}</td>
@@ -704,6 +775,8 @@ function renderAguinaldo() {
     return `<tr class="${i%2===0?'even':'odd'}">
       <td class="left">${symBadge(p.symbol, colorMapAg)}</td>
       <td class="left" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#94a3b8" title="${p.activo}">${p.activo}</td>
+      <td class="dimmed" style="font-size:12px">${p.fechaCompra || '—'}</td>
+      <td class="dimmed">${p.mesesCartera ? p.mesesCartera.toFixed(1) : '—'}</td>
       <td class="dimmed">${p.cedears}</td>
       <td style="color:#cbd5e1;font-weight:500">${fARS(p.precioCedear)}</td>
       <td class="dimmed">${fARS(p.precioCompra)}</td>
@@ -786,8 +859,10 @@ async function cargarTodo() {
 
 cargarTodo();
 fetchCripto();
+fetchXOM();
 window._ar = setInterval(() => { cargarTodo(); }, 5*60*1000);
 setInterval(() => fetchCripto(), 15*60*1000);
+setInterval(() => fetchXOM(), 15*60*1000);
 </script>
 </body>
 </html>
