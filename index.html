@@ -98,16 +98,19 @@
   .dist-cell { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
   .dist-bar { height: 3px; border-radius: 2px; min-width: 3px; }
   .divider { border: none; border-top: 1px solid #3a3e46; margin: 14px 0 16px; }
-  .geo-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
-  .geo-card { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; padding: 15px 16px; position: relative; overflow: hidden; }
+  .geo-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 6px; }
+  .geo-card { background: #25282f; border: 1px solid #3a3e46; border-radius: 10px; padding: 9px 11px; position: relative; overflow: hidden; }
   .geo-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
   .geo-card.nonus::before { background: linear-gradient(90deg, #f59e0b, #ec4899); }
   .geo-card.us::before { background: linear-gradient(90deg, #3b82f6, #6366f1); }
   .geo-card.tech::before { background: linear-gradient(90deg, #22d3ee, #6366f1); }
   .geo-card.nontech::before { background: linear-gradient(90deg, #84cc16, #10b981); }
-  .geo-bar-track { background: #1b1d22; border-radius: 6px; height: 8px; margin-top: 9px; overflow: hidden; }
-  .geo-bar-fill { height: 100%; border-radius: 6px; }
-  .geo-target { font-size: 10px; color: #64748b; margin-top: 6px; }
+  .geo-card .card-label { font-size: 9px; margin-bottom: 4px; }
+  .geo-card .card-val { font-size: 14px; margin-bottom: 2px; }
+  .geo-card .card-sub { font-size: 9.5px; }
+  .geo-bar-track { background: #1b1d22; border-radius: 5px; height: 4px; margin-top: 6px; overflow: hidden; }
+  .geo-bar-fill { height: 100%; border-radius: 5px; }
+  .geo-target { font-size: 8.5px; color: #64748b; margin-top: 4px; }
   @media (max-width: 1100px) { .patrimonio-grid { grid-template-columns: repeat(3, 1fr); } }
 </style>
 </head>
@@ -332,9 +335,6 @@ function parsePct(s) {
   if (/,\d{1,2}$/.test(str)) str = str.replace(',', '.');
   let n = parseFloat(str);
   if (isNaN(n)) return 0;
-  // Si la celda viene sin signo "%" es porque Sheets exportó el valor crudo
-  // de una celda con formato de porcentaje (ej. 7.03% se exporta como 0.0703).
-  // En ese caso hay que multiplicar por 100 para volver a la escala correcta.
   if (!hasPercentSign) n = n * 100;
   return n;
 }
@@ -342,7 +342,6 @@ function parsePct(s) {
 function parseFechaFlexible(raw) {
   if (!raw) return null;
   const str = String(raw).trim();
-  // Formato corto tipo D/M/AAAA o D/M/AA (el habitual del Sheet)
   const parts = str.split('/');
   if (parts.length === 3) {
     const d = parseInt(parts[0], 10), m = parseInt(parts[1], 10);
@@ -353,8 +352,6 @@ function parseFechaFlexible(raw) {
       if (!isNaN(dt.getTime())) return dt;
     }
   }
-  // Fallback: si la celda vino como fecha "cruda" de Sheets (ej. "Wed Jul 01 2026 19:00:00 GMT-0300..."),
-  // dejamos que el motor de JS la interprete directamente.
   const parsed = new Date(str);
   if (!isNaN(parsed.getTime())) return parsed;
   return null;
@@ -472,12 +469,6 @@ function parseSheetData(raw) {
     const saldoActual  = parseNum(get(r, iSaldo));
     const montoCompra  = parseNum(get(r, iMonto));
     const winLoss      = parseNum(get(r, iWLars >= 0 ? iWLars : iWL));
-    // FIX: en vez de confiar en el parseo de la celda de texto "G/P %"
-    // (que puede venir con o sin el símbolo "%" según cómo Sheets/Apps Script
-    // serializa el valor, causando el bug de mostrar 0.12% en vez de 12.31%),
-    // el porcentaje se calcula directamente a partir de saldoActual y montoCompra,
-    // que son valores numéricos ya confiables. Aplica tanto a CEDEARs como a Aguinaldo
-    // porque ambas tablas usan esta misma función.
     const pctVal        = montoCompra ? ((saldoActual - montoCompra) / montoCompra) * 100 : 0;
     const saldoUSD     = parseNum(get(r, iUSD));
     const fechaRaw      = get(r, iFecha).trim();
@@ -496,9 +487,6 @@ function parseSheetData(raw) {
     invertido:   sumInv   || totalInv,
     saldoPesos:  sumSaldo  || totalPesos,
     resultado:   sumRes    || (totalPesos - totalInv),
-    // FIX: mismo criterio que arriba — calcular directo de totalPesos/totalInv
-    // en vez de depender de parsePct() sobre la celda de texto "Rendimiento",
-    // para que la card de resumen no pueda desincronizarse de la tabla.
     rendimiento: totalInv ? (totalPesos - totalInv) / totalInv * 100 : 0,
     saldoUSD:    sumUSD    || pos.reduce((s, p) => s + p.saldoUSD, 0)
   };
@@ -722,8 +710,6 @@ function fPct(n, sign=true) {
 }
 function pctBadge(n) { return `<span class="pct-badge ${n>=0?'pos':'neg'}">${fPct(n)}</span>`; }
 
-// Descripciones cortas para el tooltip al pasar el mouse sobre el ticker.
-// Si un símbolo no está acá, el tooltip simplemente no aparece (no rompe nada).
 const TICKER_INFO = {
   IVV:  "iShares Core S&P 500 ETF — las 500 empresas más grandes de EE.UU.",
   EEM:  "iShares MSCI Emerging Markets ETF — acciones de mercados emergentes (China, India, Brasil, etc.)",
@@ -750,20 +736,12 @@ const TICKER_INFO = {
   AO27: "Bono soberano argentino en dólares, ley Argentina, vencimiento 2027",
 };
 
-// Clasificación geográfica de cada ticker CEDEAR de la cartera principal.
-// 'non-us' = ETFs de exposición fuera de EE.UU. (EFA: desarrollados ex-US,
-// EEM: emergentes, EWY: Corea del Sur). Todo lo que no está listado acá
-// se toma como 'us' por default (ver comentario en calcGeoConcentracion).
 const GEO_CLASSIFICATION = {
   EFA: 'non-us',
   EEM: 'non-us',
   EWY: 'non-us',
 };
 
-// Clasificación "tech/growth" = acciones individuales de crecimiento,
-// a diferencia de los ETFs diversificados (IVV, RSP, VIG, sectoriales, etc.)
-// y de IBIT (que es cripto, no equity tech). Todo lo que no está listado
-// acá se toma como 'resto' por default (mismo criterio que GEO_CLASSIFICATION).
 const TECH_CLASSIFICATION = {
   NOW: 'tech',
   ADBE: 'tech',
@@ -823,7 +801,6 @@ function renderGeoCards() {
   document.getElementById('geo-us-monto').textContent = 'Resto de la cartera · ' + fARS(geo.montoUS);
   document.getElementById('geo-us-bar').style.width = Math.min(100, geo.pctUS) + '%';
 
-  // Aviso visual simple si se sale del rango objetivo 20%-25% Non-US
   const nonUsCard = document.querySelector('.geo-card.nonus');
   if (geo.pctNonUS < 20 || geo.pctNonUS > 25) {
     nonUsCard.style.borderColor = '#f59e0b';
