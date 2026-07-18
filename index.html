@@ -19,6 +19,11 @@
   .btn-success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; font-weight: 400; }
   .btn-sm { padding: 6px 11px; font-size: 12px; }
   .hbtns { display: flex; gap: 8px; flex-shrink: 0; }
+  .asset-summary { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .asset-chip { background: #25282f; border: 1px solid #3a3e46; border-radius: 20px; padding: 6px 13px; font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 6px; white-space: nowrap; cursor: help; }
+  .asset-chip b { color: #f1f5f9; font-weight: 800; font-size: 13px; }
+  .asset-chip.total { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.35); color: #a5b4fc; }
+  .asset-chip.total b { color: #c7d2fe; }
   .panel { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
   .panel h3 { font-size: 14px; font-weight: 700; color: #60a5fa; margin-bottom: 8px; }
   .panel p { font-size: 13px; color: #cbd5e1; line-height: 1.7; margin-bottom: 12px; }
@@ -59,6 +64,9 @@
   .balanz-row label { font-size: 9.5px; color: #7eb8d4; flex: 1; line-height: 1.2; }
   .balanz-row input { width: 64px; background: #212329; border: 1px solid #3a3e46; border-radius: 5px; padding: 3px 5px; color: #bfdbfe; font-size: 12px; font-weight: 700; outline: none; text-align: right; }
   .balanz-row input:focus { border-color: #3b82f6; }
+  .balanz-row input::-webkit-outer-spin-button,
+  .balanz-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .balanz-row input[type=number] { -moz-appearance: textfield; }
   .table-wrap { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
   .table-head { padding: 13px 18px; border-bottom: 1px solid #3a3e46; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
   .table-head span { font-size: 13px; font-weight: 700; color: #e2e8f0; }
@@ -140,6 +148,8 @@
       <button class="btn btn-success" onclick="togglePanel()">🔗 Sheets</button>
     </div>
   </div>
+
+  <div class="asset-summary" id="asset-summary"></div>
 
   <div class="panel" id="connect-panel" style="display:none">
     <h3>🔗 Cambiar URL de Google Sheets</h3>
@@ -234,9 +244,9 @@
       </div>
       <div class="card-patrimonio">
         <div class="card-label">💵 Fondos Balanz (saldo USD)</div>
-        <div class="balanz-row"><label>Ahorro en Dólares A</label><input type="number" id="fb-0" oninput="recalcPatrimonio()" placeholder="0"/></div>
-        <div class="balanz-row"><label>Money Market USD A</label><input type="number" id="fb-1" oninput="recalcPatrimonio()" placeholder="0"/></div>
-        <div class="balanz-row"><label>Estrategia I USD A</label><input type="number" id="fb-2" oninput="recalcPatrimonio()" placeholder="0"/></div>
+        <div class="balanz-row"><label>Corporativo</label><input type="number" id="fb-0" oninput="recalcPatrimonio()" placeholder="0"/></div>
+        <div class="balanz-row"><label>Money Market USD</label><input type="number" id="fb-1" oninput="recalcPatrimonio()" placeholder="0"/></div>
+        <div class="balanz-row"><label>Dólar Corto Plazo</label><input type="number" id="fb-2" oninput="recalcPatrimonio()" placeholder="0"/></div>
         <div class="card-val" id="balanz-usd-val" style="margin-top:8px; font-size:15px; color:#a78bfa">—</div>
         <div class="card-sub" style="margin-bottom:2px">total en USD</div>
         <div class="card-val" id="balanz-saldo">—</div>
@@ -945,7 +955,47 @@ function renderRankings() {
   document.getElementById('rank-bot').innerHTML = items([...positions].sort((a,b)=>a.pct-b.pct).slice(0,5));
 }
 
-function render() { renderCards(); renderAguinaldoCards(); renderTable(); renderDistList(); renderRankings(); renderGeoCards(); renderTechCards(); updateSortIndicators(); }
+const CRIPTO_DISPLAY_NAMES = {
+  bitcoin: 'Bitcoin', tether: 'Tether', algorand: 'Algorand', secret: 'Secret',
+  solana: 'Solana', iota: 'IOTA', 'avalanche-2': 'Avalanche', stellar: 'Stellar',
+  cardano: 'Cardano', vechain: 'VeChain', polkadot: 'Polkadot',
+  'hedera-hashgraph': 'Hedera', 'injective-protocol': 'Injective', storj: 'Storj',
+  'badger-dao': 'Badger DAO',
+};
+
+// Conteo de activos por tipo de instrumento, para la barra de resumen debajo del header.
+// CEDEARs/ETFs sale de la tabla unificada (CEDEARs + Aguinaldo); el resto son posiciones
+// fijas de la sección Patrimonio (no vienen del sheet, así que van hardcodeadas).
+function renderAssetSummary() {
+  const cedearCount = allPositions.length;
+  const bonoSoberano = 1;      // AO27
+  const bonoCorporativo = 1;   // SNEBO
+  const accionNYSE = 1;        // XOM
+  const fciCount = 3;          // Fondos Balanz
+  const criptoCount = CRIPTO_HOLDINGS.length;
+  const total = cedearCount + bonoSoberano + bonoCorporativo + accionNYSE + fciCount + criptoCount;
+
+  const cedearNames = allPositions.length ? allPositions.map(p => p.symbol).join(', ') : 'cargando…';
+  const criptoNames = CRIPTO_HOLDINGS.map(h => CRIPTO_DISPLAY_NAMES[h.id] || h.id).join(', ');
+  const fciNames = 'Balanz: Corporativo, Money Market USD, Dólar Corto Plazo';
+
+  const chips = [
+    { label: 'CEDEARs/ETFs', val: cedearCount, detail: cedearNames },
+    { label: 'bono soberano', val: bonoSoberano, detail: 'AO27 (bono soberano argentino en dólares, venc. 2027)' },
+    { label: 'bono corporativo', val: bonoCorporativo, detail: 'SNEBO (San Miguel, Obligación Negociable 2029)' },
+    { label: 'acción NYSE', val: accionNYSE, detail: 'XOM (ExxonMobil)' },
+    { label: 'FCI', val: fciCount, detail: fciNames },
+    { label: 'criptomonedas', val: criptoCount, detail: criptoNames },
+  ];
+
+  const totalDetail = chips.map(c => `${c.label}: ${c.val}`).join(' · ');
+
+  document.getElementById('asset-summary').innerHTML =
+    chips.map(c => `<div class="asset-chip" title="${c.detail.replace(/"/g,'&quot;')}"><b>${c.val}</b> ${c.label}</div>`).join('') +
+    `<div class="asset-chip total" title="${totalDetail.replace(/"/g,'&quot;')}"><b>${total}</b> activos en total</div>`;
+}
+
+function render() { renderCards(); renderAguinaldoCards(); renderTable(); renderDistList(); renderRankings(); renderGeoCards(); renderTechCards(); renderAssetSummary(); updateSortIndicators(); }
 
 let panelOpen = false;
 function togglePanel() {
