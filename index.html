@@ -50,14 +50,23 @@
   .pat-input { background: #212329; border: 1px solid #3a3e46; border-radius: 6px; padding: 4px 8px; color: #bfdbfe; font-size: 14px; font-weight: 700; width: 100%; margin-top: 4px; outline: none; font-variant-numeric: tabular-nums; }
   .pat-input:focus { border-color: #3b82f6; }
   .pat-hint { font-size: 10px; color: #64748b; margin-top: 3px; }
+  .ccl-inline { display: flex; align-items: center; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(59,130,246,0.2); }
+  .ccl-inline label { font-size: 9.5px; color: #7eb8d4; }
+  .ccl-inline input { width: 62px; background: #212329; border: 1px solid #3a3e46; border-radius: 5px; padding: 3px 5px; color: #bfdbfe; font-size: 11px; font-weight: 700; outline: none; text-align: right; margin: 0; }
+  .ccl-inline input:focus { border-color: #3b82f6; }
+  .ccl-inline span { font-size: 11px; color: #93c5fd; font-weight: 700; margin-left: auto; }
   .balanz-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
   .balanz-row label { font-size: 9.5px; color: #7eb8d4; flex: 1; line-height: 1.2; }
   .balanz-row input { width: 64px; background: #212329; border: 1px solid #3a3e46; border-radius: 5px; padding: 3px 5px; color: #bfdbfe; font-size: 12px; font-weight: 700; outline: none; text-align: right; }
   .balanz-row input:focus { border-color: #3b82f6; }
   .table-wrap { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
-  .table-head { padding: 13px 18px; border-bottom: 1px solid #3a3e46; display: flex; justify-content: space-between; align-items: center; }
+  .table-head { padding: 13px 18px; border-bottom: 1px solid #3a3e46; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
   .table-head span { font-size: 13px; font-weight: 700; color: #e2e8f0; }
   .table-head small { font-size: 11px; color: #475569; }
+  .table-head-right { display: flex; align-items: center; gap: 10px; }
+  .btn-filter { background: #2b2e35; border: 1px solid #454952; color: #cbd5e1; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.15s; }
+  .btn-filter:hover { opacity: 0.85; }
+  .btn-filter.active { background: rgba(236,72,153,0.15); border-color: rgba(236,72,153,0.4); color: #f9a8d4; }
   .table-scroll { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead tr { background: #1b1d22; }
@@ -68,6 +77,7 @@
   tbody tr:hover { background: #1a2d45 !important; }
   tbody tr.even { background: transparent; }
   tbody tr.odd { background: #2b2e35; }
+  tbody tr.ag-hidden { display: none; }
   td { padding: 10px 12px; text-align: right; vertical-align: middle; }
   td.left { text-align: left; }
   td.dimmed { color: #94a3b8; }
@@ -76,17 +86,20 @@
   td.neg { color: #f87171; font-weight: 700; }
   .sym { display: inline-block; border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; color: #fff; white-space: nowrap; }
   .sym[title] { cursor: help; }
+  .ag-badge { display: inline-block; font-size: 12px; margin-left: 4px; }
   .pct-badge { display: inline-block; padding: 3px 7px; border-radius: 5px; font-size: 12px; font-weight: 700; white-space: nowrap; }
   .pct-badge.pos { background: rgba(52,211,153,0.12); color: #34d399; }
   .pct-badge.neg { background: rgba(248,113,113,0.12); color: #f87171; }
-  .bottom { display: grid; grid-template-columns: 240px 1fr; gap: 14px; }
-  .chart-box { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; padding: 16px; }
-  .chart-box h4 { font-size: 13px; font-weight: 700; color: #e2e8f0; margin-bottom: 10px; }
-  .donut-svg { display: block; margin: 0 auto; }
-  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 10px; margin-top: 10px; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #94a3b8; }
-  .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .legend-pct { margin-left: auto; color: #64748b; }
+  .chart-box { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .chart-box h4 { font-size: 13px; font-weight: 700; color: #e2e8f0; margin-bottom: 12px; }
+  .dist-list { display: flex; flex-direction: column; gap: 8px; max-height: 380px; overflow-y: auto; padding-right: 6px; }
+  .dist-list::-webkit-scrollbar { width: 6px; }
+  .dist-list::-webkit-scrollbar-thumb { background: #3a3e46; border-radius: 3px; }
+  .dist-row { display: grid; grid-template-columns: 100px 1fr 52px; align-items: center; gap: 10px; }
+  .dist-row-label { display: flex; align-items: center; min-width: 0; }
+  .dist-bar-track { background: #1e2128; border-radius: 3px; height: 6px; overflow: hidden; }
+  .dist-bar-fill { height: 100%; border-radius: 3px; background: #6366f1; opacity: 0.55; transition: width 0.2s; }
+  .dist-row-pct { text-align: right; font-size: 11.5px; font-weight: 600; color: #94a3b8; font-variant-numeric: tabular-nums; }
   .rankings { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .rank-box { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; padding: 16px; }
   .rank-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
@@ -112,6 +125,7 @@
   .geo-bar-fill { height: 100%; border-radius: 5px; }
   .geo-target { font-size: 8.5px; color: #64748b; margin-top: 4px; }
   @media (max-width: 1100px) { .patrimonio-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px) { .rankings { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -142,8 +156,8 @@
   <div class="cards">
     <div class="card"><div class="card-label">Capital invertido</div><div class="card-val neutral" id="c-invertido">—</div><div class="card-sub">costo base total ARS</div></div>
     <div class="card"><div class="card-label">Saldo actual</div><div class="card-val neutral" id="c-saldo">—</div><div class="card-sub">valuación hoy en pesos</div></div>
-    <div class="card"><div class="card-label">Resultado</div><div class="card-val" id="c-resultado">—</div><div class="card-sub">ganancia / pérdida</div></div>
-    <div class="card"><div class="card-label">Rendimiento</div><div class="card-val" id="c-rend">—</div><div class="card-sub">performance acumulado</div></div>
+    <div class="card"><div class="card-label">Resultado global</div><div class="card-val" id="c-resultado">—</div><div class="card-sub">CEDEARs + Aguinaldo</div></div>
+    <div class="card"><div class="card-label">Rendimiento global</div><div class="card-val" id="c-rend">—</div><div class="card-sub">CEDEARs + Aguinaldo</div></div>
     <div class="card"><div class="card-label">Valuación USD</div><div class="card-val neutral" id="c-usd">—</div><div class="card-sub">saldo en dólares</div></div>
   </div>
 
@@ -203,11 +217,11 @@
         <div class="card-sub">saldo en ARS</div>
       </div>
       <div class="card-patrimonio">
-        <div class="card-label">CCL actual</div>
-        <div style="margin-top:4px"><input class="pat-input" id="ccl-input" type="number" placeholder="CCL" oninput="recalcPatrimonio()"/></div>
-        <div class="pat-hint">se actualiza desde H1 del sheet</div>
-        <div class="card-val neutral" id="ccl-display" style="margin-top:8px; font-size:15px">—</div>
-        <div class="card-sub">ARS por USD</div>
+        <div class="card-label">AO27 · Bono soberano ARG 2027</div>
+        <div style="margin-top:4px"><input class="pat-input" id="ao27-precio" type="number" placeholder="precio c/100 nominales ARS" oninput="recalcPatrimonio()"/></div>
+        <div class="pat-hint">450 nominales · (ej: 103000)</div>
+        <div class="card-val" id="ao27-saldo" style="margin-top:8px">—</div>
+        <div class="card-sub">saldo en ARS</div>
       </div>
       <div class="card-patrimonio">
         <div class="card-label">₿ Cripto · CoinGecko</div>
@@ -231,14 +245,34 @@
       <div class="card-patrimonio total">
         <div class="card-label">Patrimonio total</div>
         <div class="card-val" id="pat-total">—</div>
-        <div class="card-sub">CEDEARs + Aguinaldo + XOM + SNEBO + Cripto + Fondos</div>
+        <div class="card-sub">CEDEARs + Aguinaldo + XOM + SNEBO + AO27 + Cripto + Fondos</div>
         <div style="margin-top:8px; font-size:11px; color:#3b82f6" id="pat-usd">— USD</div>
+        <div class="ccl-inline">
+          <label for="ccl-input">CCL</label>
+          <input class="pat-input" id="ccl-input" type="number" placeholder="CCL" oninput="recalcPatrimonio()"/>
+          <span id="ccl-display">—</span>
+        </div>
       </div>
     </div>
   </div>
 
+  <div class="section-label">🎁 Aguinaldo · resumen</div>
+  <div class="cards" style="grid-template-columns: repeat(4, 1fr)">
+    <div class="card"><div class="card-label">Capital invertido</div><div class="card-val neutral" id="ag-invertido">—</div><div class="card-sub">costo base ARS</div></div>
+    <div class="card"><div class="card-label">Saldo actual</div><div class="card-val neutral" id="ag-saldo">—</div><div class="card-sub">valuación hoy</div></div>
+    <div class="card"><div class="card-label">Activos</div><div class="card-val neutral" id="ag-activos" style="font-size:14px">—</div><div class="card-sub">en qué se invirtió</div></div>
+    <div class="card"><div class="card-label">Resultado</div><div class="card-val" id="ag-resultado">—</div><div class="card-sub">ganancia / pérdida</div></div>
+  </div>
+  </div>
+
   <div class="table-wrap">
-    <div class="table-head"><span>Posiciones CEDEARs</span><small>Clic en columna para ordenar</small></div>
+    <div class="table-head">
+      <span>Posiciones</span>
+      <div class="table-head-right">
+        <button class="btn-filter" id="btn-ag-filter" onclick="toggleAgFilter()">🎁 Solo Aguinaldo</button>
+        <small>Clic en columna para ordenar</small>
+      </div>
+    </div>
     <div class="table-scroll">
       <table>
         <thead><tr id="pos-table-head">
@@ -261,49 +295,16 @@
     </div>
   </div>
 
-  <div class="section-label">🎁 Aguinaldo</div>
-  <div class="cards">
-    <div class="card"><div class="card-label">Capital invertido</div><div class="card-val neutral" id="ag-invertido">—</div><div class="card-sub">costo base ARS</div></div>
-    <div class="card"><div class="card-label">Saldo actual</div><div class="card-val neutral" id="ag-saldo">—</div><div class="card-sub">valuación hoy</div></div>
-    <div class="card"><div class="card-label">Resultado</div><div class="card-val" id="ag-resultado">—</div><div class="card-sub">ganancia / pérdida</div></div>
-    <div class="card"><div class="card-label">Rendimiento</div><div class="card-val" id="ag-rend">—</div><div class="card-sub">performance</div></div>
-    <div class="card"><div class="card-label">Valuación USD</div><div class="card-val neutral" id="ag-usd">—</div><div class="card-sub">saldo en dólares</div></div>
-  </div>
-  <div class="table-wrap">
-    <div class="table-head"><span>Posiciones Aguinaldo</span><small>Clic en columna para ordenar</small></div>
-    <div class="table-scroll">
-      <table>
-        <thead><tr id="ag-table-head">
-          <th class="left" data-key="symbol" data-label="Ticker" onclick="sortByAg('symbol')">Ticker</th>
-          <th class="left" style="min-width:180px">Activo</th>
-          <th data-key="fechaCompraTs" data-label="Fecha" onclick="sortByAg('fechaCompraTs')">Fecha</th>
-          <th data-key="mesesCartera" data-label="Meses" onclick="sortByAg('mesesCartera')">Meses</th>
-          <th data-key="cedears" data-label="Cant." onclick="sortByAg('cedears')">Cant.</th>
-          <th data-key="precioCedear" data-label="$ actual" onclick="sortByAg('precioCedear')">$ actual</th>
-          <th data-key="precioCompra" data-label="$ compra" onclick="sortByAg('precioCompra')">$ compra</th>
-          <th data-key="saldoActual" data-label="Saldo ARS" onclick="sortByAg('saldoActual')">Saldo ARS</th>
-          <th data-key="montoCompra" data-label="Costo ARS" onclick="sortByAg('montoCompra')">Costo ARS</th>
-          <th data-key="winLoss" data-label="G/P ARS" onclick="sortByAg('winLoss')">G/P ARS</th>
-          <th data-key="pct" data-label="G/P %" onclick="sortByAg('pct')">G/P %</th>
-          <th data-key="saldoUSD" data-label="USD" onclick="sortByAg('saldoUSD')">USD</th>
-          <th data-key="dist" data-label="Dist." onclick="sortByAg('dist')">Dist.</th>
-        </tr></thead>
-        <tbody id="ag-tbody"></tbody>
-      </table>
-    </div>
-  </div>
   <hr class="divider"/>
 
-  <div class="bottom">
-    <div class="chart-box">
-      <h4>Distribución</h4>
-      <svg class="donut-svg" id="donut-svg" width="200" height="160" viewBox="0 0 200 160"></svg>
-      <div class="legend" id="donut-legend"></div>
-    </div>
-    <div class="rankings">
-      <div class="rank-box"><h4 class="green">🏆 Top performers</h4><div id="rank-top"></div></div>
-      <div class="rank-box"><h4 class="red">💀 Underperformers</h4><div id="rank-bot"></div></div>
-    </div>
+  <div class="chart-box" id="dist-box">
+    <h4>Distribución</h4>
+    <div class="dist-list" id="dist-list"></div>
+  </div>
+
+  <div class="rankings">
+    <div class="rank-box"><h4 class="green">🏆 Top performers</h4><div id="rank-top"></div></div>
+    <div class="rank-box"><h4 class="red">💀 Underperformers</h4><div id="rank-bot"></div></div>
   </div>
 </div>
 
@@ -311,10 +312,13 @@
 const DEFAULT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnhIdGSvBx1r-vkd2nYEIxMhTe8tHMviejnBr4_fj0sN9Y9j-AfSQclYN5UaS7eaVzVAgN6tXIaQJ5/pub?gid=1233054202&single=true&output=csv';
 const COLORS = ["#6366f1","#8b5cf6","#22d3ee","#3b82f6","#10b981","#f59e0b","#ef4444","#ec4899","#84cc16","#f97316","#a78bfa"];
 
+// positions: CEDEARs. positionsAg: Aguinaldo. allPositions: fusión de ambas para tabla+distribución.
 let positions = [], summary = {}, sortKey = 'saldoActual', sortDir = -1;
-let positionsAg = [], summaryAg = {}, colorMapAg = {}, sortKeyAg = 'saldoActual', sortDirAg = -1;
+let positionsAg = [], summaryAg = {}, colorMapAg = {};
+let allPositions = [];
 let currentUrl = DEFAULT_URL, lastUpdate = null, colorMap = {};
 let cclValue = 0;
+let showOnlyAguinaldo = false;
 
 function parseNum(s) {
   if (!s) return 0;
@@ -494,17 +498,33 @@ function parseSheetData(raw) {
   return { positions: pos, summary: summaryOut, ccl, xomPrice };
 }
 
+// Fusiona CEDEARs + Aguinaldo en un solo array para tabla y distribución.
+// Cada posición de Aguinaldo se marca con esAguinaldo:true y recalcula "dist" sobre el total fusionado.
+function buildAllPositions() {
+  const cedearList = positions.map(p => Object.assign({}, p, { esAguinaldo: false }));
+  const agList = positionsAg.map(p => Object.assign({}, p, { esAguinaldo: true }));
+  const merged = cedearList.concat(agList);
+  const totalPesos = merged.reduce((s, p) => s + p.saldoActual, 0);
+  merged.forEach(p => { p.dist = totalPesos ? (p.saldoActual / totalPesos) * 100 : 0; });
+  allPositions = merged;
+
+  // colorMap unificado: cada símbolo (de cualquiera de las dos hojas) obtiene un color estable.
+  merged.forEach((p) => {
+    if (colorMap[p.symbol] === undefined) {
+      colorMap[p.symbol] = Object.keys(colorMap).length;
+    }
+  });
+}
+
 async function fetchLive() {
   setStatus('loading');
   document.getElementById('error-box').style.display = 'none';
   try {
     const raw = await fetchCSV('lista de seguimiento');
-    const { positions: pos, summary: sum, ccl, xomPrice } = parseSheetData(raw);
+    const { positions: rawPos, ccl, xomPrice } = parseSheetData(raw);
 
-    if (!Object.keys(colorMap).length) pos.forEach((p, i) => colorMap[p.symbol] = i);
-
-    positions = pos;
-    summary = sum;
+    positions = excluirManejadosAparte(rawPos);
+    summary = recalcularSummary(positions);
 
     if (ccl > 0) {
       cclValue = ccl;
@@ -518,6 +538,7 @@ async function fetchLive() {
 
     lastUpdate = new Date();
     setStatus('live');
+    buildAllPositions();
     render();
     recalcPatrimonio();
   } catch(e) {
@@ -527,22 +548,38 @@ async function fetchLive() {
   }
 }
 
+// Símbolos que se gestionan manualmente en la sección Patrimonio (con su propio input de precio)
+// y por lo tanto NUNCA deben contarse en el capital invertido / resultado de Aguinaldo o CEDEARs,
+// aunque aparezcan cargados como fila en el sheet.
+const SYMBOLS_MANEJADOS_APARTE = ['AO27'];
+
+function excluirManejadosAparte(pos) {
+  return pos.filter(p => !SYMBOLS_MANEJADOS_APARTE.includes(p.symbol.toUpperCase()));
+}
+
+function recalcularSummary(pos) {
+  const totalPesos = pos.reduce((s, p) => s + p.saldoActual, 0);
+  const totalInv = pos.reduce((s, p) => s + p.montoCompra, 0);
+  return {
+    invertido: totalInv,
+    saldoPesos: totalPesos,
+    resultado: totalPesos - totalInv,
+    rendimiento: totalInv ? (totalPesos - totalInv) / totalInv * 100 : 0,
+    saldoUSD: pos.reduce((s, p) => s + p.saldoUSD, 0)
+  };
+}
+
 async function fetchAguinaldo() {
   try {
     const raw = await fetchCSV('Aguinaldo');
-    const { positions: pos, summary: sum } = parseSheetData(raw);
-    if (!Object.keys(colorMapAg).length) pos.forEach((p, i) => colorMapAg[p.symbol] = i);
-    positionsAg = pos;
-    summaryAg = sum;
-    renderAguinaldo();
+    const { positions: pos } = parseSheetData(raw);
+    positionsAg = excluirManejadosAparte(pos);
+    summaryAg = recalcularSummary(positionsAg);
+    buildAllPositions();
+    render();
     recalcPatrimonio();
   } catch(e) {
     console.error('Aguinaldo: ' + e.message);
-    document.getElementById('ag-invertido').textContent = 'error';
-    document.getElementById('ag-tbody').innerHTML =
-      `<tr><td colspan="13" style="color:#f87171;text-align:center;padding:14px">
-        ❌ ${e.message} — revisá que la hoja se llame exactamente "Aguinaldo" y que hayas redesplegado el Apps Script como Nueva versión.
-      </td></tr>`;
   }
 }
 
@@ -620,6 +657,7 @@ function recalcPatrimonio() {
   const ccl     = parseFloat(document.getElementById('ccl-input').value) || cclValue || 0;
   const xomPx   = parseFloat(document.getElementById('xom-precio').value) || 0;
   const sneboPx = parseFloat(document.getElementById('snebo-precio').value) || 0;
+  const ao27Px  = parseFloat(document.getElementById('ao27-precio').value) || 0;
   const balanzUSD = getBalanzTotalUSD();
 
   if (ccl > 0) {
@@ -628,18 +666,20 @@ function recalcPatrimonio() {
 
   const xomARS    = xomPx    > 0 ? 50 * xomPx * ccl : 0;
   const sneboARS  = sneboPx  > 0 ? (sneboPx / 100) * 1270 : 0;
+  const ao27ARS   = ao27Px   > 0 ? (ao27Px / 100) * 450 : 0;
   const criptoARS = criptoTotalUSD > 0 ? criptoTotalUSD * ccl : 0;
   const balanzARS = balanzUSD > 0 ? balanzUSD * ccl : 0;
 
   document.getElementById('xom-saldo').textContent    = xomARS    > 0 ? fARS(xomARS)    : '—';
   document.getElementById('snebo-saldo').textContent  = sneboARS  > 0 ? fARS(sneboARS)  : '—';
+  document.getElementById('ao27-saldo').textContent   = ao27ARS   > 0 ? fARS(ao27ARS)   : '—';
   document.getElementById('cripto-saldo').textContent = criptoARS > 0 ? fARS(criptoARS) : '—';
   document.getElementById('balanz-usd-val').textContent = balanzUSD > 0 ? fUSD(balanzUSD) : '—';
   document.getElementById('balanz-saldo').textContent   = balanzARS > 0 ? fARS(balanzARS) : '—';
 
   const cedarSaldo = summary.saldoPesos || 0;
   const agSaldo = summaryAg.saldoPesos || 0;
-  const total = cedarSaldo + agSaldo + xomARS + sneboARS + criptoARS + balanzARS;
+  const total = cedarSaldo + agSaldo + xomARS + sneboARS + ao27ARS + criptoARS + balanzARS;
   const totalUSD = ccl > 0 ? total / ccl : 0;
 
   document.getElementById('pat-total').textContent = total > 0 ? fARS(total) : '—';
@@ -656,9 +696,18 @@ function setStatus(s) {
 
 function doRefresh() { colorMap = {}; colorMapAg = {}; cargarTodo(); }
 
-function sortBy(k) { if (sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=-1; } renderTable(); renderDonut(); updateSortIndicators(); }
+function toggleAgFilter() {
+  showOnlyAguinaldo = !showOnlyAguinaldo;
+  const btn = document.getElementById('btn-ag-filter');
+  btn.classList.toggle('active', showOnlyAguinaldo);
+  renderTable();
+  renderDistList();
+}
+
+function sortBy(k) { if (sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=-1; } renderTable(); renderDistList(); updateSortIndicators(); }
 function getSorted() {
-  return [...positions].sort((a, b) => {
+  const base = showOnlyAguinaldo ? allPositions.filter(p => p.esAguinaldo) : allPositions;
+  return [...base].sort((a, b) => {
     const av = a[sortKey], bv = b[sortKey];
     const an = typeof av === 'number' ? av : Number(av);
     const bn = typeof bv === 'number' ? bv : Number(bv);
@@ -670,28 +719,10 @@ function getSorted() {
   });
 }
 
-function sortByAg(k) { if (sortKeyAg===k) sortDirAg=-sortDirAg; else { sortKeyAg=k; sortDirAg=-1; } renderAguinaldo(); updateSortIndicators(); }
-function getSortedAg() {
-  return [...positionsAg].sort((a, b) => {
-    const av = a[sortKeyAg], bv = b[sortKeyAg];
-    const an = typeof av === 'number' ? av : Number(av);
-    const bn = typeof bv === 'number' ? bv : Number(bv);
-    if (!isNaN(an) && !isNaN(bn)) {
-      if (an === bn) return String(a.symbol).localeCompare(String(b.symbol));
-      return (an - bn) * sortDirAg;
-    }
-    return String(av).localeCompare(String(bv)) * sortDirAg;
-  });
-}
-
 function updateSortIndicators() {
   document.querySelectorAll('#pos-table-head th[data-key]').forEach(th => {
     const base = th.getAttribute('data-label');
     th.textContent = base + (th.getAttribute('data-key') === sortKey ? (sortDir === 1 ? ' ▲' : ' ▼') : '');
-  });
-  document.querySelectorAll('#ag-table-head th[data-key]').forEach(th => {
-    const base = th.getAttribute('data-label');
-    th.textContent = base + (th.getAttribute('data-key') === sortKeyAg ? (sortDirAg === 1 ? ' ▲' : ' ▼') : '');
   });
 }
 
@@ -714,6 +745,7 @@ const TICKER_INFO = {
   IVV:  "iShares Core S&P 500 ETF — las 500 empresas más grandes de EE.UU.",
   EEM:  "iShares MSCI Emerging Markets ETF — acciones de mercados emergentes (China, India, Brasil, etc.)",
   EFA:  "iShares MSCI EAFE ETF — acciones de mercados desarrollados fuera de EE.UU./Canadá (Europa, Japón, Australia)",
+  EWY:  "iShares MSCI South Korea ETF — acciones surcoreanas (Samsung, SK Hynix, Hyundai, entre otras)",
   VIG:  "Vanguard Dividend Appreciation ETF — empresas con historial de aumentar dividendos año tras año",
   RSP:  "Invesco S&P 500 Equal Weight ETF — el S&P 500 pero con el mismo peso para cada empresa (no dominado por las gigantes tech)",
   XLV:  "Health Care Select Sector SPDR — sector salud de EE.UU. (farmacéuticas, seguros médicos, equipamiento)",
@@ -809,35 +841,54 @@ function renderGeoCards() {
   }
 }
 
-function symBadge(sym, map) {
-  const m = map || colorMap;
-  const ci = m[sym] !== undefined ? m[sym] : 0;
+// El ícono de Aguinaldo va DESPUÉS del badge de ticker (a la derecha).
+function symBadge(sym, esAguinaldo) {
+  const ci = colorMap[sym] !== undefined ? colorMap[sym] : 0;
   const info = TICKER_INFO[sym];
   const titleAttr = info ? ` title="${info.replace(/"/g,'&quot;')}"` : '';
-  return `<span class="sym" style="background:${COLORS[ci % COLORS.length]}"${titleAttr}>${sym}</span>`;
+  const giftIcon = esAguinaldo ? '<span class="ag-badge" title="Posición del Aguinaldo">🎁</span>' : '';
+  return `<span class="sym" style="background:${COLORS[ci % COLORS.length]}"${titleAttr}>${sym}</span>${giftIcon}`;
+}
+
+function renderAguinaldoCards() {
+  const s = summaryAg;
+  document.getElementById('ag-invertido').textContent = fARS(s.invertido);
+  document.getElementById('ag-saldo').textContent = fARS(s.saldoPesos);
+  const rEl = document.getElementById('ag-resultado');
+  rEl.textContent = fARS(s.resultado, true);
+  rEl.className = 'card-val ' + (s.resultado >= 0 ? 'pos' : 'neg');
+  const activosTxt = positionsAg.length ? positionsAg.map(p => p.symbol).join(', ') : '—';
+  document.getElementById('ag-activos').textContent = activosTxt;
 }
 
 function renderCards() {
   const s = summary;
   document.getElementById('c-invertido').textContent = fARS(s.invertido);
   document.getElementById('c-saldo').textContent = fARS(s.saldoPesos);
+
+  // Resultado y Rendimiento globales: combinan CEDEARs + Aguinaldo, no solo CEDEARs.
+  const invertidoGlobal = (s.invertido || 0) + (summaryAg.invertido || 0);
+  const saldoGlobal = (s.saldoPesos || 0) + (summaryAg.saldoPesos || 0);
+  const resultadoGlobal = (s.resultado || 0) + (summaryAg.resultado || 0);
+  const rendimientoGlobal = invertidoGlobal ? (saldoGlobal - invertidoGlobal) / invertidoGlobal * 100 : 0;
+
   const rEl = document.getElementById('c-resultado');
-  rEl.textContent = fARS(s.resultado, true);
-  rEl.className = 'card-val ' + (s.resultado >= 0 ? 'pos' : 'neg');
+  rEl.textContent = fARS(resultadoGlobal, true);
+  rEl.className = 'card-val ' + (resultadoGlobal >= 0 ? 'pos' : 'neg');
   const rnEl = document.getElementById('c-rend');
-  rnEl.textContent = fPct(s.rendimiento);
-  rnEl.className = 'card-val ' + (s.rendimiento >= 0 ? 'pos' : 'neg');
+  rnEl.textContent = fPct(rendimientoGlobal);
+  rnEl.className = 'card-val ' + (rendimientoGlobal >= 0 ? 'pos' : 'neg');
   document.getElementById('c-usd').textContent = fUSD(s.saldoUSD);
 }
 
 function renderTable() {
   const sorted = getSorted();
   document.getElementById('pos-tbody').innerHTML = sorted.map((p, i) => {
-    const ci = colorMap[p.symbol] !== undefined ? colorMap[p.symbol] : i;
     const barW = Math.max(3, Math.round(p.dist * 1.4));
     const wl = p.winLoss >= 0 ? 'pos' : 'neg';
+    const ci = colorMap[p.symbol] !== undefined ? colorMap[p.symbol] : i;
     return `<tr class="${i%2===0?'even':'odd'}">
-      <td class="left">${symBadge(p.symbol)}</td>
+      <td class="left">${symBadge(p.symbol, p.esAguinaldo)}</td>
       <td class="left" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#94a3b8" title="${p.activo}">${p.activo}</td>
       <td class="dimmed" style="font-size:12px">${p.fechaCompra || '—'}</td>
       <td class="dimmed">${p.mesesCartera ? p.mesesCartera.toFixed(1) : '—'}</td>
@@ -851,81 +902,30 @@ function renderTable() {
       <td style="color:#94a3b8">${fUSD(p.saldoUSD)}</td>
       <td><div class="dist-cell">
         <div class="dist-bar" style="width:${barW}px;background:${COLORS[ci%COLORS.length]}"></div>
-        <span style="color:#64748b;font-size:11px">${p.dist.toFixed(1)}%</span>
+        <span style="color:#cbd5e1;font-size:11px;font-weight:600">${p.dist.toFixed(1)}%</span>
       </div></td>
     </tr>`;
   }).join('');
-  const wins = positions.filter(p => p.pct > 0).length;
-  const loss = positions.filter(p => p.pct < 0).length;
-  document.getElementById('pos-count').textContent = `${positions.length} posiciones · ${wins}▲ ${loss}▼`;
+  const wins = sorted.filter(p => p.pct > 0).length;
+  const loss = sorted.filter(p => p.pct < 0).length;
+  document.getElementById('pos-count').textContent = `${sorted.length} posiciones · ${wins}▲ ${loss}▼`;
 }
 
-function renderAguinaldo() {
-  const s = summaryAg;
-  document.getElementById('ag-invertido').textContent = fARS(s.invertido);
-  document.getElementById('ag-saldo').textContent = fARS(s.saldoPesos);
-  const rEl = document.getElementById('ag-resultado');
-  rEl.textContent = fARS(s.resultado, true);
-  rEl.className = 'card-val ' + (s.resultado >= 0 ? 'pos' : 'neg');
-  const rnEl = document.getElementById('ag-rend');
-  rnEl.textContent = fPct(s.rendimiento);
-  rnEl.className = 'card-val ' + (s.rendimiento >= 0 ? 'pos' : 'neg');
-  document.getElementById('ag-usd').textContent = fUSD(s.saldoUSD);
+// Lista de barras horizontales rankeadas (reemplaza al donut).
+// Ordenada de mayor a menor distribución, con ancho relativo al máximo
+// para que se distingan bien incluso posiciones chicas en carteras con muchos activos.
+function renderDistList() {
+  const base = getSorted();
+  const sorted = [...base].sort((a, b) => b.dist - a.dist);
+  const maxDist = Math.max(...sorted.map(p => p.dist), 0.0001);
 
-  const sortedAg = getSortedAg();
-  document.getElementById('ag-tbody').innerHTML = sortedAg.map((p, i) => {
-    const wl = p.winLoss >= 0 ? 'pos' : 'neg';
-    return `<tr class="${i%2===0?'even':'odd'}">
-      <td class="left">${symBadge(p.symbol, colorMapAg)}</td>
-      <td class="left" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#94a3b8" title="${p.activo}">${p.activo}</td>
-      <td class="dimmed" style="font-size:12px">${p.fechaCompra || '—'}</td>
-      <td class="dimmed">${p.mesesCartera ? p.mesesCartera.toFixed(1) : '—'}</td>
-      <td class="dimmed">${p.cedears}</td>
-      <td style="color:#cbd5e1;font-weight:500">${fARS(p.precioCedear)}</td>
-      <td class="dimmed">${fARS(p.precioCompra)}</td>
-      <td class="bright">${fARS(p.saldoActual)}</td>
-      <td class="dimmed">${fARS(p.montoCompra)}</td>
-      <td class="${wl}">${p.winLoss>=0?'+':''}${fARS(p.winLoss)}</td>
-      <td>${pctBadge(p.pct)}</td>
-      <td style="color:#94a3b8">${fUSD(p.saldoUSD)}</td>
-      <td style="color:#64748b;font-size:11px">${p.dist.toFixed(1)}%</td>
-    </tr>`;
-  }).join('');
-}
-
-function renderDonut() {
-  const sorted = getSorted();
-  const cx=100, cy=82, R=68, r=42;
-  let angle = -Math.PI/2;
-  const svgNS = "http://www.w3.org/2000/svg";
-  const svg = document.getElementById('donut-svg');
-  while (svg.firstChild) svg.removeChild(svg.firstChild);
-
-  sorted.forEach((p, i) => {
-    const ci = colorMap[p.symbol] !== undefined ? colorMap[p.symbol] : i;
-    const color = COLORS[ci % COLORS.length];
-    const slice = (p.dist / 100) * 2 * Math.PI;
-    const x1=cx+R*Math.cos(angle), y1=cy+R*Math.sin(angle);
-    const x2=cx+R*Math.cos(angle+slice), y2=cy+R*Math.sin(angle+slice);
-    const xi1=cx+r*Math.cos(angle), yi1=cy+r*Math.sin(angle);
-    const xi2=cx+r*Math.cos(angle+slice), yi2=cy+r*Math.sin(angle+slice);
-    const lg = slice > Math.PI ? 1 : 0;
-    const d = `M${x1},${y1} A${R},${R} 0 ${lg} 1 ${x2},${y2} L${xi2},${yi2} A${r},${r} 0 ${lg} 0 ${xi1},${yi1} Z`;
-
-    const path = document.createElementNS(svgNS, 'path');
-    path.setAttribute('d', d);
-    path.setAttribute('fill', color);
-    path.setAttribute('stroke', '#1b1d22');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('opacity', '0.9');
-    svg.appendChild(path);
-
-    angle += slice;
-  });
-
-  document.getElementById('donut-legend').innerHTML = sorted.map((p, i) => {
-    const ci = colorMap[p.symbol] !== undefined ? colorMap[p.symbol] : i;
-    return `<div class="legend-item"><div class="legend-dot" style="background:${COLORS[ci%COLORS.length]}"></div><span>${p.symbol}</span><span class="legend-pct">${p.dist.toFixed(0)}%</span></div>`;
+  document.getElementById('dist-list').innerHTML = sorted.map((p) => {
+    const widthPct = Math.max(2, (p.dist / maxDist) * 100);
+    return `<div class="dist-row">
+      <div class="dist-row-label">${symBadge(p.symbol, p.esAguinaldo)}</div>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width:${widthPct}%"></div></div>
+      <div class="dist-row-pct">${p.dist.toFixed(1)}%</div>
+    </div>`;
   }).join('');
 }
 
@@ -934,7 +934,7 @@ function renderRankings() {
     const wl = p.winLoss >= 0 ? 'pos' : 'neg';
     return `<div class="rank-row">
       <div style="display:flex;align-items:center;gap:8px;min-width:0">
-        ${symBadge(p.symbol)}
+        ${symBadge(p.symbol, p.esAguinaldo)}
         <span style="font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px" title="${p.activo}">${p.activo}</span>
       </div>
       <div class="rank-right">${pctBadge(p.pct)}<span class="rank-amt ${wl}">${p.winLoss>=0?'+':''}${fARS(p.winLoss)}</span></div>
@@ -944,7 +944,7 @@ function renderRankings() {
   document.getElementById('rank-bot').innerHTML = items([...positions].sort((a,b)=>a.pct-b.pct).slice(0,5));
 }
 
-function render() { renderCards(); renderTable(); renderDonut(); renderRankings(); renderGeoCards(); renderTechCards(); updateSortIndicators(); }
+function render() { renderCards(); renderAguinaldoCards(); renderTable(); renderDistList(); renderRankings(); renderGeoCards(); renderTechCards(); updateSortIndicators(); }
 
 let panelOpen = false;
 function togglePanel() {
