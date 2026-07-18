@@ -24,6 +24,8 @@
   .asset-chip b { color: #f1f5f9; font-weight: 800; font-size: 13px; }
   .asset-chip.total { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.35); color: #a5b4fc; }
   .asset-chip.total b { color: #c7d2fe; }
+  .evo-empty { font-size: 12px; color: #64748b; padding: 24px 0; text-align: center; }
+  #snapshot-status { font-size: 11px; color: #94a3b8; margin-left: 4px; align-self: center; }
   .panel { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
   .panel h3 { font-size: 14px; font-weight: 700; color: #60a5fa; margin-bottom: 8px; }
   .panel p { font-size: 13px; color: #cbd5e1; line-height: 1.7; margin-bottom: 12px; }
@@ -145,6 +147,8 @@
     </div>
     <div class="hbtns">
       <button class="btn btn-ghost btn-sm" onclick="doRefresh()">↻ Refresh</button>
+      <button class="btn btn-ghost btn-sm" id="btn-snapshot" onclick="saveSnapshot()">📸 Snapshot</button>
+      <span id="snapshot-status"></span>
       <button class="btn btn-success" onclick="togglePanel()">🔗 Sheets</button>
     </div>
   </div>
@@ -316,6 +320,11 @@
     <div class="rank-box"><h4 class="green">🏆 Top performers</h4><div id="rank-top"></div></div>
     <div class="rank-box"><h4 class="red">💀 Underperformers</h4><div id="rank-bot"></div></div>
   </div>
+
+  <div class="chart-box" id="evolution-box" style="margin-top:14px">
+    <h4>📈 Evolución del patrimonio</h4>
+    <div id="evolution-chart"><div class="evo-empty">Cargando…</div></div>
+  </div>
 </div>
 
 <script>
@@ -329,6 +338,8 @@ let allPositions = [];
 let currentUrl = DEFAULT_URL, lastUpdate = null, colorMap = {};
 let cclValue = 0;
 let showOnlyAguinaldo = false;
+// Últimos totales calculados, usados por saveSnapshot() para guardar el snapshot de hoy.
+let lastPatrimonioTotal = 0, lastResultadoGlobal = 0, lastRendimientoGlobal = 0;
 
 function parseNum(s) {
   if (!s) return 0;
@@ -694,6 +705,8 @@ function recalcPatrimonio() {
 
   document.getElementById('pat-total').textContent = total > 0 ? fARS(total) : '—';
   document.getElementById('pat-usd').textContent   = totalUSD > 0 ? '≈ ' + fUSD(totalUSD) : '—';
+
+  lastPatrimonioTotal = total;
 }
 
 function setStatus(s) {
@@ -890,6 +903,9 @@ function renderCards() {
   rnEl.textContent = fPct(rendimientoGlobal);
   rnEl.className = 'card-val ' + (rendimientoGlobal >= 0 ? 'pos' : 'neg');
   document.getElementById('c-usd').textContent = fUSD(s.saldoUSD);
+
+  lastResultadoGlobal = resultadoGlobal;
+  lastRendimientoGlobal = rendimientoGlobal;
 }
 
 function renderTable() {
@@ -997,6 +1013,120 @@ function renderAssetSummary() {
 
 function render() { renderCards(); renderAguinaldoCards(); renderTable(); renderDistList(); renderRankings(); renderGeoCards(); renderTechCards(); renderAssetSummary(); updateSortIndicators(); }
 
+// ---- Evolución del patrimonio: snapshot manual + gráfico de línea ----
+
+async function saveSnapshot() {
+  const btn = document.getElementById('btn-snapshot');
+  const statusEl = document.getElementById('snapshot-status');
+  if (!lastPatrimonioTotal) {
+    statusEl.textContent = '⚠️ esperá a que cargue el patrimonio';
+    return;
+  }
+  btn.disabled = true;
+  statusEl.textContent = '⟳ guardando…';
+  try {
+    const payload = {
+      patrimonio: lastPatrimonioTotal,
+      resultado: lastResultadoGlobal,
+      rendimiento: lastRendimientoGlobal
+    };
+    const postRes = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const txt = await postRes.text();
+    if (txt.indexOf('ERROR') === 0) throw new Error(txt);
+    statusEl.textContent = '🟢 snapshot guardado';
+    fetchHistorial();
+  } catch(e) {
+    statusEl.textContent = '🔴 ' + e.message;
+  } finally {
+    btn.disabled = false;
+    setTimeout(() => { statusEl.textContent = ''; }, 4000);
+  }
+}
+
+async function fetchHistorial() {
+  const container = document.getElementById('evolution-chart');
+  try {
+    const raw = await fetchCSV('Historial');
+    const rows = parseCSV(raw);
+    const dataRows = rows.slice(1).filter(r => r[0] && r[1]);
+    const data = dataRows.map(r => {
+      const dt = parseFechaFlexible(r[0]) || new Date(r[0]);
+      return {
+        date: dt,
+        dateLabel: dt ? formatFechaCorta(dt) : String(r[0]),
+        patrimonio: parseNum(r[1]),
+        resultado: parseNum(r[2]),
+        rendimiento: parsePct(r[3]),
+      };
+    }).filter(d => d.date && !isNaN(d.date.getTime()) && d.patrimonio > 0);
+    data.sort((a, b) => a.date - b.date);
+    renderEvolutionChart(data);
+  } catch(e) {
+    container.innerHTML = '<div class="evo-empty">Todavía no hay hoja "Historial" o está vacía.<br/>Creála en tu Google Sheet y usá el botón 📸 Snapshot para empezar.</div>';
+  }
+}
+
+function renderEvolutionChart(data) {
+  const container = document.getElementById('evolution-chart');
+  if (!data.length) {
+    container.innerHTML = '<div class="evo-empty">Todavía no hay snapshots guardados.<br/>Usá el botón 📸 Snapshot para empezar a trackear la evolución.</div>';
+    return;
+  }
+  if (data.length === 1) {
+    container.innerHTML = `<div class="evo-empty">Un solo snapshot guardado (${data[0].dateLabel}: ${fARS(data[0].patrimonio)}).<br/>Guardá otro en un rato para empezar a ver la curva.</div>`;
+    return;
+  }
+
+  const W = 900, H = 220, padL = 65, padR = 20, padT = 20, padB = 28;
+  const values = data.map(d => d.patrimonio);
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = (max - min) || max || 1;
+  const yMin = min - range * 0.08, yMax = max + range * 0.08;
+  const yRange = (yMax - yMin) || 1;
+  const stepX = (W - padL - padR) / Math.max(1, data.length - 1);
+
+  const points = data.map((d, i) => ({
+    x: padL + i * stepX,
+    y: padT + (H - padT - padB) * (1 - (d.patrimonio - yMin) / yRange),
+    d
+  }));
+
+  const pathD = points.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+  const areaD = pathD + ` L${points[points.length - 1].x.toFixed(1)},${H - padB} L${points[0].x.toFixed(1)},${H - padB} Z`;
+
+  const circles = points.map(p =>
+    `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="#6366f1"><title>${p.d.dateLabel}: ${fARS(p.d.patrimonio)}</title></circle>`
+  ).join('');
+
+  const labelEvery = Math.max(1, Math.ceil(data.length / 7));
+  const xLabels = points.filter((p, i) => i % labelEvery === 0 || i === points.length - 1)
+    .map(p => `<text x="${p.x.toFixed(1)}" y="${H - 8}" font-size="9" fill="#64748b" text-anchor="middle">${p.d.dateLabel}</text>`).join('');
+
+  const yTop = `<text x="${padL - 8}" y="${padT + 4}" font-size="9" fill="#64748b" text-anchor="end">${fARS(yMax)}</text>`;
+  const yBot = `<text x="${padL - 8}" y="${H - padB}" font-size="9" fill="#64748b" text-anchor="end">${fARS(yMin)}</text>`;
+
+  const first = data[0], last = data[data.length - 1];
+  const change = first.patrimonio ? ((last.patrimonio - first.patrimonio) / first.patrimonio) * 100 : 0;
+  const changeColor = change >= 0 ? '#34d399' : '#f87171';
+
+  container.innerHTML = `
+    <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">
+      Desde ${first.dateLabel} hasta ${last.dateLabel}: <span style="color:${changeColor};font-weight:700">${fPct(change)}</span>
+    </div>
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+      <path d="${areaD}" fill="rgba(99,102,241,0.08)" stroke="none"/>
+      <path d="${pathD}" fill="none" stroke="#6366f1" stroke-width="2"/>
+      ${circles}
+      ${xLabels}
+      ${yTop}
+      ${yBot}
+    </svg>`;
+}
+
 let panelOpen = false;
 function togglePanel() {
   panelOpen = !panelOpen;
@@ -1014,6 +1144,7 @@ async function cargarTodo() {
 cargarTodo();
 fetchCripto();
 fetchXOM();
+fetchHistorial();
 window._ar = setInterval(() => { cargarTodo(); }, 5*60*1000);
 setInterval(() => fetchCripto(), 15*60*1000);
 setInterval(() => fetchXOM(), 15*60*1000);
