@@ -182,7 +182,7 @@
     <div class="geo-card tech">
       <div class="card-label">💻 Concentración Tech/Growth</div>
       <div class="card-val neutral" id="tech-pct">—</div>
-      <div class="card-sub" id="tech-monto">NOW + ADBE + NVDA + ANET + FISV</div>
+      <div class="card-sub" id="tech-monto">NOW + ADBE + NVDA + ANET + FISV + EWY</div>
       <div class="geo-bar-track"><div class="geo-bar-fill" id="tech-bar" style="width:0%;background:linear-gradient(90deg,#22d3ee,#6366f1)"></div></div>
       <div class="geo-target">Sin límite fijo — mirar en conjunto con el resto</div>
     </div>
@@ -780,6 +780,7 @@ const TECH_CLASSIFICATION = {
   NVDA: 'tech',
   ANET: 'tech',
   FISV: 'tech',
+  EWY: 'tech',
 };
 
 function calcTechConcentracion(posArr) {
@@ -800,7 +801,7 @@ function calcTechConcentracion(posArr) {
 function renderTechCards() {
   const t = calcTechConcentracion(positions);
   document.getElementById('tech-pct').textContent = fPct(t.pctTech, false);
-  document.getElementById('tech-monto').textContent = 'NOW + ADBE + NVDA + ANET + FISV · ' + fARS(t.montoTech);
+  document.getElementById('tech-monto').textContent = 'NOW + ADBE + NVDA + ANET + FISV + EWY · ' + fARS(t.montoTech);
   document.getElementById('tech-bar').style.width = Math.min(100, t.pctTech) + '%';
 
   document.getElementById('nontech-pct').textContent = fPct(t.pctResto, false);
