@@ -110,6 +110,16 @@
   .dist-bar-track { background: #1e2128; border-radius: 3px; height: 6px; overflow: hidden; }
   .dist-bar-fill { height: 100%; border-radius: 3px; background: #6366f1; opacity: 0.55; transition: width 0.2s; }
   .dist-row-pct { text-align: right; font-size: 11.5px; font-weight: 600; color: #94a3b8; font-variant-numeric: tabular-nums; }
+  .sector-row { margin-bottom: 14px; }
+  .sector-row:last-child { margin-bottom: 0; }
+  .sector-row-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; gap: 10px; }
+  .sector-name { font-size: 13px; font-weight: 700; color: #f1f5f9; }
+  .sector-pct { font-size: 13px; font-weight: 800; color: #cbd5e1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .sector-bar-track { background: #1e2128; border-radius: 4px; height: 9px; overflow: hidden; }
+  .sector-bar-fill { height: 100%; border-radius: 4px; }
+  .sector-detail { font-size: 12.5px; color: #b0bac7; margin-top: 5px; line-height: 1.6; }
+  .sector-detail b { color: #e2e8f0; }
+  .sector-detail em { color: #8b96a5; font-style: normal; }
   .rankings { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .rank-box { background: #25282f; border: 1px solid #3a3e46; border-radius: 12px; padding: 16px; }
   .rank-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
@@ -119,7 +129,7 @@
   .rank-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
   .rank-amt { font-size: 11px; color: #94a3b8; }
   .dist-cell { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
-  .dist-bar { height: 3px; border-radius: 2px; min-width: 3px; }
+  .dist-bar { height: 7px; border-radius: 3px; min-width: 3px; }
   .divider { border: none; border-top: 1px solid #3a3e46; margin: 14px 0 16px; }
   .geo-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 6px; }
   .geo-card { background: #25282f; border: 1px solid #3a3e46; border-radius: 10px; padding: 9px 11px; position: relative; overflow: hidden; }
@@ -147,8 +157,6 @@
     </div>
     <div class="hbtns">
       <button class="btn btn-ghost btn-sm" onclick="doRefresh()">↻ Refresh</button>
-      <button class="btn btn-ghost btn-sm" id="btn-snapshot" onclick="saveSnapshot()">📸 Snapshot</button>
-      <span id="snapshot-status"></span>
       <button class="btn btn-success" onclick="togglePanel()">🔗 Sheets</button>
     </div>
   </div>
@@ -207,6 +215,11 @@
       <div class="geo-bar-track"><div class="geo-bar-fill" id="nontech-bar" style="width:0%;background:linear-gradient(90deg,#84cc16,#10b981)"></div></div>
       <div class="geo-target">Complemento de Tech/Growth</div>
     </div>
+  </div>
+
+  <div class="chart-box" id="sector-dist-box" style="margin-bottom:18px">
+    <h4>📊 Distribución por sectores</h4>
+    <div id="sector-dist-list"></div>
   </div>
 
   <hr class="divider"/>
@@ -302,7 +315,7 @@
           <th data-key="winLoss" data-label="G/P ARS" onclick="sortBy('winLoss')">G/P ARS</th>
           <th data-key="pct" data-label="G/P %" onclick="sortBy('pct')">G/P %</th>
           <th data-key="saldoUSD" data-label="USD" onclick="sortBy('saldoUSD')">USD</th>
-          <th data-key="dist" data-label="Dist." onclick="sortBy('dist')">Dist.</th>
+          <th data-key="dist" data-label="Dist." onclick="sortBy('dist')" style="min-width:140px">Dist.</th>
         </tr></thead>
         <tbody id="pos-tbody"></tbody>
       </table>
@@ -311,19 +324,9 @@
 
   <hr class="divider"/>
 
-  <div class="chart-box" id="dist-box">
-    <h4>Distribución</h4>
-    <div class="dist-list" id="dist-list"></div>
-  </div>
-
   <div class="rankings">
     <div class="rank-box"><h4 class="green">🏆 Top performers</h4><div id="rank-top"></div></div>
     <div class="rank-box"><h4 class="red">💀 Underperformers</h4><div id="rank-bot"></div></div>
-  </div>
-
-  <div class="chart-box" id="evolution-box" style="margin-top:14px">
-    <h4>📈 Evolución del patrimonio</h4>
-    <div id="evolution-chart"><div class="evo-empty">Cargando…</div></div>
   </div>
 </div>
 
@@ -338,8 +341,6 @@ let allPositions = [];
 let currentUrl = DEFAULT_URL, lastUpdate = null, colorMap = {};
 let cclValue = 0;
 let showOnlyAguinaldo = false;
-// Últimos totales calculados, usados por saveSnapshot() para guardar el snapshot de hoy.
-let lastPatrimonioTotal = 0, lastResultadoGlobal = 0, lastRendimientoGlobal = 0;
 
 function parseNum(s) {
   if (!s) return 0;
@@ -705,8 +706,6 @@ function recalcPatrimonio() {
 
   document.getElementById('pat-total').textContent = total > 0 ? fARS(total) : '—';
   document.getElementById('pat-usd').textContent   = totalUSD > 0 ? '≈ ' + fUSD(totalUSD) : '—';
-
-  lastPatrimonioTotal = total;
 }
 
 function setStatus(s) {
@@ -724,10 +723,9 @@ function toggleAgFilter() {
   const btn = document.getElementById('btn-ag-filter');
   btn.classList.toggle('active', showOnlyAguinaldo);
   renderTable();
-  renderDistList();
 }
 
-function sortBy(k) { if (sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=-1; } renderTable(); renderDistList(); updateSortIndicators(); }
+function sortBy(k) { if (sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=-1; } renderTable(); updateSortIndicators(); }
 function getSorted() {
   const base = showOnlyAguinaldo ? allPositions.filter(p => p.esAguinaldo) : allPositions;
   return [...base].sort((a, b) => {
@@ -805,6 +803,84 @@ const TECH_CLASSIFICATION = {
   FISV: 'tech',
   EWY: 'tech',
 };
+
+const SECTOR_CLASSIFICATION = {
+  XLU: 'Utilities',
+  XLF: 'Financiero',
+  XLE: 'Energía',
+  XLY: 'Consumo discrecional',
+  XLP: 'Consumo defensivo',
+  XLI: 'Industrial',
+  XLV: 'Salud',
+  ITA: 'Aeroespacial y defensa',
+  NOW: 'Tecnología',
+  ADBE: 'Tecnología',
+  NVDA: 'Tecnología',
+  ANET: 'Tecnología',
+  FISV: 'Tecnología',
+  EFA: 'Internacional',
+  EEM: 'Internacional',
+  EWY: 'Internacional',
+  IBIT: 'Cripto',
+  IVV: 'Diversificado',
+  RSP: 'Diversificado',
+  IVE: 'Diversificado',
+  VIG: 'Diversificado',
+};
+
+const SECTOR_DESCRIPTIONS = {
+  'Tecnología': 'Software y hardware ligados al ciclo de IA/growth: gestión empresarial, creatividad, chips y redes de datacenter.',
+  'Internacional': 'Exposición fuera de EE.UU.: mercados desarrollados, emergentes y Corea del Sur. Es tu pata de diversificación geográfica.',
+  'Utilities': 'Eléctricas y gas de EE.UU. Sector defensivo, cada vez más ligado a la demanda de energía de los data centers de IA.',
+  'Financiero': 'Bancos, aseguradoras y financieras de EE.UU. Sensible a tasas de interés y ciclo económico.',
+  'Energía': 'Petroleras y gasíferas de EE.UU. Correlaciona con el precio del petróleo, buen hedge inflacionario.',
+  'Consumo discrecional': 'Retail, autos y ocio: gasto no esencial, más cíclico y sensible a la economía.',
+  'Consumo defensivo': 'Alimentos, higiene y bebidas: gasto esencial, suele sostenerse mejor en recesiones.',
+  'Industrial': 'Manufactura, transporte y maquinaria. Buen termómetro de la actividad económica real.',
+  'Salud': 'Farmacéuticas, seguros médicos y equipamiento. Defensivo, con demanda relativamente estable.',
+  'Aeroespacial y defensa': 'Aeroespacial y defensa de EE.UU. Muy ligado a presupuestos militares y contratos de gobierno.',
+  'Cripto': 'Exposición a Bitcoin a través de un ETF listado en bolsa.',
+  'Diversificado': 'ETFs de mercado amplio de EE.UU., sin sesgo a un sector puntual — funcionan como base de la cartera.',
+  'Otros': 'Posiciones que todavía no tienen un sector asignado en el mapeo.',
+};
+
+function calcSectorDistribution(posArr) {
+  const totals = {};
+  let totalGeneral = 0;
+  posArr.forEach(p => {
+    totalGeneral += p.saldoActual;
+    const sector = SECTOR_CLASSIFICATION[p.symbol] || 'Otros';
+    if (!totals[sector]) totals[sector] = { monto: 0, tickers: [] };
+    totals[sector].monto += p.saldoActual;
+    totals[sector].tickers.push(p.symbol);
+  });
+  return Object.keys(totals).map(sector => ({
+    sector,
+    monto: totals[sector].monto,
+    tickers: totals[sector].tickers,
+    pct: totalGeneral ? (totals[sector].monto / totalGeneral) * 100 : 0
+  })).sort((a, b) => b.pct - a.pct);
+}
+
+function renderSectorDist() {
+  const data = calcSectorDistribution(positions);
+  const el = document.getElementById('sector-dist-list');
+  if (!data.length) { el.innerHTML = ''; return; }
+  const maxPct = Math.max(...data.map(d => d.pct), 0.0001);
+  el.innerHTML = data.map((d, i) => {
+    const widthPct = Math.max(2, (d.pct / maxPct) * 100);
+    const color = COLORS[i % COLORS.length];
+    const desc = SECTOR_DESCRIPTIONS[d.sector] || '';
+    return `<div class="sector-row">
+      <div class="sector-row-top">
+        <span class="sector-name">${d.sector}</span>
+        <span class="sector-pct">${d.pct.toFixed(1)}% · ${fARS(d.monto)}</span>
+      </div>
+      <div class="sector-bar-track"><div class="sector-bar-fill" style="width:${widthPct}%;background:${color}"></div></div>
+      <div class="sector-detail"><b>${d.tickers.join(', ')}</b>${desc ? ' — <em>' + desc + '</em>' : ''}</div>
+    </div>`;
+  }).join('');
+}
 
 function calcTechConcentracion(posArr) {
   let totalTech = 0, totalGeneral = 0;
@@ -903,15 +979,12 @@ function renderCards() {
   rnEl.textContent = fPct(rendimientoGlobal);
   rnEl.className = 'card-val ' + (rendimientoGlobal >= 0 ? 'pos' : 'neg');
   document.getElementById('c-usd').textContent = fUSD(s.saldoUSD);
-
-  lastResultadoGlobal = resultadoGlobal;
-  lastRendimientoGlobal = rendimientoGlobal;
 }
 
 function renderTable() {
   const sorted = getSorted();
   document.getElementById('pos-tbody').innerHTML = sorted.map((p, i) => {
-    const barW = Math.max(3, Math.round(p.dist * 1.4));
+    const barW = Math.max(4, Math.round(p.dist * 3.2));
     const wl = p.winLoss >= 0 ? 'pos' : 'neg';
     const ci = colorMap[p.symbol] !== undefined ? colorMap[p.symbol] : i;
     return `<tr class="${i%2===0?'even':'odd'}">
@@ -929,31 +1002,13 @@ function renderTable() {
       <td style="color:#94a3b8">${fUSD(p.saldoUSD)}</td>
       <td><div class="dist-cell">
         <div class="dist-bar" style="width:${barW}px;background:${COLORS[ci%COLORS.length]}"></div>
-        <span style="color:#cbd5e1;font-size:11px;font-weight:600">${p.dist.toFixed(1)}%</span>
+        <span style="color:#cbd5e1;font-size:12.5px;font-weight:700">${p.dist.toFixed(1)}%</span>
       </div></td>
     </tr>`;
   }).join('');
   const wins = sorted.filter(p => p.pct > 0).length;
   const loss = sorted.filter(p => p.pct < 0).length;
   document.getElementById('pos-count').textContent = `${sorted.length} posiciones · ${wins}▲ ${loss}▼`;
-}
-
-// Lista de barras horizontales rankeadas (reemplaza al donut).
-// Ordenada de mayor a menor distribución, con ancho relativo al máximo
-// para que se distingan bien incluso posiciones chicas en carteras con muchos activos.
-function renderDistList() {
-  const base = getSorted();
-  const sorted = [...base].sort((a, b) => b.dist - a.dist);
-  const maxDist = Math.max(...sorted.map(p => p.dist), 0.0001);
-
-  document.getElementById('dist-list').innerHTML = sorted.map((p) => {
-    const widthPct = Math.max(2, (p.dist / maxDist) * 100);
-    return `<div class="dist-row">
-      <div class="dist-row-label">${symBadge(p.symbol, p.esAguinaldo)}</div>
-      <div class="dist-bar-track"><div class="dist-bar-fill" style="width:${widthPct}%"></div></div>
-      <div class="dist-row-pct">${p.dist.toFixed(1)}%</div>
-    </div>`;
-  }).join('');
 }
 
 function renderRankings() {
@@ -1011,121 +1066,7 @@ function renderAssetSummary() {
     `<div class="asset-chip total" title="${totalDetail.replace(/"/g,'&quot;')}"><b>${total}</b> activos en total</div>`;
 }
 
-function render() { renderCards(); renderAguinaldoCards(); renderTable(); renderDistList(); renderRankings(); renderGeoCards(); renderTechCards(); renderAssetSummary(); updateSortIndicators(); }
-
-// ---- Evolución del patrimonio: snapshot manual + gráfico de línea ----
-
-async function saveSnapshot() {
-  const btn = document.getElementById('btn-snapshot');
-  const statusEl = document.getElementById('snapshot-status');
-  if (!lastPatrimonioTotal) {
-    statusEl.textContent = '⚠️ esperá a que cargue el patrimonio';
-    return;
-  }
-  btn.disabled = true;
-  statusEl.textContent = '⟳ guardando…';
-  try {
-    const payload = {
-      patrimonio: lastPatrimonioTotal,
-      resultado: lastResultadoGlobal,
-      rendimiento: lastRendimientoGlobal
-    };
-    const postRes = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    });
-    const txt = await postRes.text();
-    if (txt.indexOf('ERROR') === 0) throw new Error(txt);
-    statusEl.textContent = '🟢 snapshot guardado';
-    fetchHistorial();
-  } catch(e) {
-    statusEl.textContent = '🔴 ' + e.message;
-  } finally {
-    btn.disabled = false;
-    setTimeout(() => { statusEl.textContent = ''; }, 4000);
-  }
-}
-
-async function fetchHistorial() {
-  const container = document.getElementById('evolution-chart');
-  try {
-    const raw = await fetchCSV('Historial');
-    const rows = parseCSV(raw);
-    const dataRows = rows.slice(1).filter(r => r[0] && r[1]);
-    const data = dataRows.map(r => {
-      const dt = parseFechaFlexible(r[0]) || new Date(r[0]);
-      return {
-        date: dt,
-        dateLabel: dt ? formatFechaCorta(dt) : String(r[0]),
-        patrimonio: parseNum(r[1]),
-        resultado: parseNum(r[2]),
-        rendimiento: parsePct(r[3]),
-      };
-    }).filter(d => d.date && !isNaN(d.date.getTime()) && d.patrimonio > 0);
-    data.sort((a, b) => a.date - b.date);
-    renderEvolutionChart(data);
-  } catch(e) {
-    container.innerHTML = '<div class="evo-empty">Todavía no hay hoja "Historial" o está vacía.<br/>Creála en tu Google Sheet y usá el botón 📸 Snapshot para empezar.</div>';
-  }
-}
-
-function renderEvolutionChart(data) {
-  const container = document.getElementById('evolution-chart');
-  if (!data.length) {
-    container.innerHTML = '<div class="evo-empty">Todavía no hay snapshots guardados.<br/>Usá el botón 📸 Snapshot para empezar a trackear la evolución.</div>';
-    return;
-  }
-  if (data.length === 1) {
-    container.innerHTML = `<div class="evo-empty">Un solo snapshot guardado (${data[0].dateLabel}: ${fARS(data[0].patrimonio)}).<br/>Guardá otro en un rato para empezar a ver la curva.</div>`;
-    return;
-  }
-
-  const W = 900, H = 220, padL = 65, padR = 20, padT = 20, padB = 28;
-  const values = data.map(d => d.patrimonio);
-  const min = Math.min(...values), max = Math.max(...values);
-  const range = (max - min) || max || 1;
-  const yMin = min - range * 0.08, yMax = max + range * 0.08;
-  const yRange = (yMax - yMin) || 1;
-  const stepX = (W - padL - padR) / Math.max(1, data.length - 1);
-
-  const points = data.map((d, i) => ({
-    x: padL + i * stepX,
-    y: padT + (H - padT - padB) * (1 - (d.patrimonio - yMin) / yRange),
-    d
-  }));
-
-  const pathD = points.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
-  const areaD = pathD + ` L${points[points.length - 1].x.toFixed(1)},${H - padB} L${points[0].x.toFixed(1)},${H - padB} Z`;
-
-  const circles = points.map(p =>
-    `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="#6366f1"><title>${p.d.dateLabel}: ${fARS(p.d.patrimonio)}</title></circle>`
-  ).join('');
-
-  const labelEvery = Math.max(1, Math.ceil(data.length / 7));
-  const xLabels = points.filter((p, i) => i % labelEvery === 0 || i === points.length - 1)
-    .map(p => `<text x="${p.x.toFixed(1)}" y="${H - 8}" font-size="9" fill="#64748b" text-anchor="middle">${p.d.dateLabel}</text>`).join('');
-
-  const yTop = `<text x="${padL - 8}" y="${padT + 4}" font-size="9" fill="#64748b" text-anchor="end">${fARS(yMax)}</text>`;
-  const yBot = `<text x="${padL - 8}" y="${H - padB}" font-size="9" fill="#64748b" text-anchor="end">${fARS(yMin)}</text>`;
-
-  const first = data[0], last = data[data.length - 1];
-  const change = first.patrimonio ? ((last.patrimonio - first.patrimonio) / first.patrimonio) * 100 : 0;
-  const changeColor = change >= 0 ? '#34d399' : '#f87171';
-
-  container.innerHTML = `
-    <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">
-      Desde ${first.dateLabel} hasta ${last.dateLabel}: <span style="color:${changeColor};font-weight:700">${fPct(change)}</span>
-    </div>
-    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
-      <path d="${areaD}" fill="rgba(99,102,241,0.08)" stroke="none"/>
-      <path d="${pathD}" fill="none" stroke="#6366f1" stroke-width="2"/>
-      ${circles}
-      ${xLabels}
-      ${yTop}
-      ${yBot}
-    </svg>`;
-}
+function render() { renderCards(); renderAguinaldoCards(); renderTable(); renderRankings(); renderGeoCards(); renderTechCards(); renderSectorDist(); renderAssetSummary(); updateSortIndicators(); }
 
 let panelOpen = false;
 function togglePanel() {
@@ -1144,7 +1085,6 @@ async function cargarTodo() {
 cargarTodo();
 fetchCripto();
 fetchXOM();
-fetchHistorial();
 window._ar = setInterval(() => { cargarTodo(); }, 5*60*1000);
 setInterval(() => fetchCripto(), 15*60*1000);
 setInterval(() => fetchXOM(), 15*60*1000);
