@@ -863,7 +863,7 @@ function calcSectorDistribution(posArr) {
 }
 
 function renderSectorDist() {
-  const data = calcSectorDistribution(positions);
+  const data = calcSectorDistribution(allPositions);
   const el = document.getElementById('sector-dist-list');
   if (!data.length) { el.innerHTML = ''; return; }
   const maxPct = Math.max(...data.map(d => d.pct), 0.0001);
