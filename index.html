@@ -315,6 +315,19 @@
 
   <hr class="divider"/>
 
+  <div class="cards" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 14px;">
+    <div class="card" style="border-color: rgba(52,211,153,0.3)">
+      <div class="card-label" style="color:#34d399">📈 Ganancias totales</div>
+      <div class="card-val pos" id="gp-ganancias-monto">—</div>
+      <div class="card-sub" id="gp-ganancias-detalle">posiciones en verde</div>
+    </div>
+    <div class="card" style="border-color: rgba(248,113,113,0.3)">
+      <div class="card-label" style="color:#f87171">📉 Pérdidas totales</div>
+      <div class="card-val neg" id="gp-perdidas-monto">—</div>
+      <div class="card-sub" id="gp-perdidas-detalle">posiciones en rojo</div>
+    </div>
+  </div>
+
   <div class="rankings">
     <div class="rank-box"><h4 class="green">🏆 Top performers</h4><div id="rank-top"></div></div>
     <div class="rank-box"><h4 class="red">💀 Underperformers</h4><div id="rank-bot"></div></div>
@@ -998,6 +1011,23 @@ function renderTable() {
   document.getElementById('pos-count').textContent = `${sorted.length} posiciones · ${wins}▲ ${loss}▼`;
 }
 
+function renderGananciasPerdidas() {
+  const ganadoras = allPositions.filter(p => p.winLoss > 0);
+  const perdedoras = allPositions.filter(p => p.winLoss < 0);
+  const totalGanancias = ganadoras.reduce((s, p) => s + p.winLoss, 0);
+  const totalPerdidas = perdedoras.reduce((s, p) => s + p.winLoss, 0);
+
+  document.getElementById('gp-ganancias-monto').textContent = ganadoras.length ? fARS(totalGanancias, true) : '—';
+  document.getElementById('gp-ganancias-detalle').textContent = ganadoras.length
+    ? `${ganadoras.length} posiciones en verde: ${ganadoras.map(p => p.symbol).join(', ')}`
+    : 'sin posiciones en verde';
+
+  document.getElementById('gp-perdidas-monto').textContent = perdedoras.length ? fARS(totalPerdidas, true) : '—';
+  document.getElementById('gp-perdidas-detalle').textContent = perdedoras.length
+    ? `${perdedoras.length} posiciones en rojo: ${perdedoras.map(p => p.symbol).join(', ')}`
+    : 'sin posiciones en rojo';
+}
+
 function renderRankings() {
   const items = arr => arr.map(p => {
     const wl = p.winLoss >= 0 ? 'pos' : 'neg';
@@ -1051,7 +1081,7 @@ function renderAssetSummary() {
     `<div class="asset-chip total" title="${totalDetail.replace(/"/g,'&quot;')}"><b>${total}</b> activos en total</div>`;
 }
 
-function render() { renderCards(); renderAguinaldoCards(); renderTable(); renderRankings(); renderGeoCards(); renderTechCards(); renderSectorDist(); renderAssetSummary(); updateSortIndicators(); }
+function render() { renderCards(); renderAguinaldoCards(); renderTable(); renderRankings(); renderGananciasPerdidas(); renderGeoCards(); renderTechCards(); renderSectorDist(); renderAssetSummary(); updateSortIndicators(); }
 
 let panelOpen = false;
 function togglePanel() {
