@@ -237,13 +237,6 @@
         <div style="font-size:10px;color:#454952;margin-top:5px" id="xom-status">no cargado</div>
       </div>
       <div class="card-patrimonio">
-        <div class="card-label">SNEBO · San Miguel ON 2029</div>
-        <div style="margin-top:4px"><input class="pat-input" id="snebo-precio" type="number" placeholder="precio c/100 nominales ARS" oninput="recalcPatrimonio()"/></div>
-        <div class="pat-hint">1270 nominales · PPC $130.985 · (ej: 103000)</div>
-        <div class="card-val" id="snebo-saldo" style="margin-top:8px">—</div>
-        <div class="card-sub">saldo en ARS</div>
-      </div>
-      <div class="card-patrimonio">
         <div class="card-label">AO27 · Bono soberano ARG 2027</div>
         <div style="margin-top:4px"><input class="pat-input" id="ao27-precio" type="number" placeholder="precio c/100 nominales ARS" oninput="recalcPatrimonio()"/></div>
         <div class="pat-hint">450 nominales · (ej: 103000)</div>
@@ -261,9 +254,7 @@
       </div>
       <div class="card-patrimonio">
         <div class="card-label">💵 Fondos Balanz (saldo USD)</div>
-        <div class="balanz-row"><label>Corporativo</label><input type="number" id="fb-0" oninput="recalcPatrimonio()" placeholder="0"/></div>
-        <div class="balanz-row"><label>Money Market USD</label><input type="number" id="fb-1" oninput="recalcPatrimonio()" placeholder="0"/></div>
-        <div class="balanz-row"><label>Dólar Corto Plazo</label><input type="number" id="fb-2" oninput="recalcPatrimonio()" placeholder="0"/></div>
+        <div class="balanz-row"><label>Dólar Corto Plazo</label><input type="number" id="fb-0" oninput="recalcPatrimonio()" placeholder="0"/></div>
         <div class="card-val" id="balanz-usd-val" style="margin-top:8px; font-size:15px; color:#a78bfa">—</div>
         <div class="card-sub" style="margin-bottom:2px">total en USD</div>
         <div class="card-val" id="balanz-saldo">—</div>
@@ -272,7 +263,7 @@
       <div class="card-patrimonio total">
         <div class="card-label">Patrimonio total</div>
         <div class="card-val" id="pat-total">—</div>
-        <div class="card-sub">CEDEARs + Aguinaldo + XOM + SNEBO + AO27 + Cripto + Fondos</div>
+        <div class="card-sub">CEDEARs + Aguinaldo + XOM + AO27 + Cripto + Fondos</div>
         <div style="margin-top:8px; font-size:11px; color:#3b82f6" id="pat-usd">— USD</div>
         <div class="ccl-inline">
           <label for="ccl-input">CCL</label>
@@ -668,17 +659,14 @@ async function fetchCripto() {
 
 function getBalanzTotalUSD() {
   let total = 0;
-  for (let i = 0; i < 3; i++) {
-    const el = document.getElementById('fb-' + i);
-    total += parseFloat(el && el.value) || 0;
-  }
+  const el = document.getElementById('fb-0');
+  total += parseFloat(el && el.value) || 0;
   return total;
 }
 
 function recalcPatrimonio() {
   const ccl     = parseFloat(document.getElementById('ccl-input').value) || cclValue || 0;
   const xomPx   = parseFloat(document.getElementById('xom-precio').value) || 0;
-  const sneboPx = parseFloat(document.getElementById('snebo-precio').value) || 0;
   const ao27Px  = parseFloat(document.getElementById('ao27-precio').value) || 0;
   const balanzUSD = getBalanzTotalUSD();
 
@@ -687,13 +675,11 @@ function recalcPatrimonio() {
   }
 
   const xomARS    = xomPx    > 0 ? 50 * xomPx * ccl : 0;
-  const sneboARS  = sneboPx  > 0 ? (sneboPx / 100) * 1270 : 0;
   const ao27ARS   = ao27Px   > 0 ? (ao27Px / 100) * 450 : 0;
   const criptoARS = criptoTotalUSD > 0 ? criptoTotalUSD * ccl : 0;
   const balanzARS = balanzUSD > 0 ? balanzUSD * ccl : 0;
 
   document.getElementById('xom-saldo').textContent    = xomARS    > 0 ? fARS(xomARS)    : '—';
-  document.getElementById('snebo-saldo').textContent  = sneboARS  > 0 ? fARS(sneboARS)  : '—';
   document.getElementById('ao27-saldo').textContent   = ao27ARS   > 0 ? fARS(ao27ARS)   : '—';
   document.getElementById('cripto-saldo').textContent = criptoARS > 0 ? fARS(criptoARS) : '—';
   document.getElementById('balanz-usd-val').textContent = balanzUSD > 0 ? fUSD(balanzUSD) : '—';
@@ -701,7 +687,7 @@ function recalcPatrimonio() {
 
   const cedarSaldo = summary.saldoPesos || 0;
   const agSaldo = summaryAg.saldoPesos || 0;
-  const total = cedarSaldo + agSaldo + xomARS + sneboARS + ao27ARS + criptoARS + balanzARS;
+  const total = cedarSaldo + agSaldo + xomARS + ao27ARS + criptoARS + balanzARS;
   const totalUSD = ccl > 0 ? total / ccl : 0;
 
   document.getElementById('pat-total').textContent = total > 0 ? fARS(total) : '—';
@@ -785,8 +771,8 @@ const TICKER_INFO = {
   NVDA: "Nvidia Corp — diseño de GPUs, líder en chips para IA",
   ANET: "Arista Networks Inc — switches y redes de alta velocidad para data centers",
   XOM:  "ExxonMobil — una de las mayores petroleras integradas del mundo",
-  SNEBO:"San Miguel — Obligación Negociable (bono corporativo) 2029",
   AO27: "Bono soberano argentino en dólares, ley Argentina, vencimiento 2027",
+  SHPQ: "Shopify Inc — plataforma de e-commerce para crear y gestionar tiendas online",
 };
 
 const GEO_CLASSIFICATION = {
@@ -826,6 +812,7 @@ const SECTOR_CLASSIFICATION = {
   RSP: 'Diversificado',
   IVE: 'Diversificado',
   VIG: 'Diversificado',
+  SHPQ: 'Diversificado',
 };
 
 const SECTOR_DESCRIPTIONS = {
@@ -840,7 +827,7 @@ const SECTOR_DESCRIPTIONS = {
   'Salud': 'Farmacéuticas, seguros médicos y equipamiento. Defensivo, con demanda relativamente estable.',
   'Aeroespacial y defensa': 'Aeroespacial y defensa de EE.UU. Muy ligado a presupuestos militares y contratos de gobierno.',
   'Cripto': 'Exposición a Bitcoin a través de un ETF listado en bolsa.',
-  'Diversificado': 'ETFs de mercado amplio de EE.UU., sin sesgo a un sector puntual — funcionan como base de la cartera.',
+  'Diversificado': 'ETFs de mercado amplio de EE.UU. y posiciones de e-commerce/tech sin sesgo a un sector puntual — funcionan como base de la cartera.',
   'Otros': 'Posiciones que todavía no tienen un sector asignado en el mapeo.',
 };
 
@@ -1022,8 +1009,8 @@ function renderRankings() {
       <div class="rank-right">${pctBadge(p.pct)}<span class="rank-amt ${wl}">${p.winLoss>=0?'+':''}${fARS(p.winLoss)}</span></div>
     </div>`;
   }).join('');
-  document.getElementById('rank-top').innerHTML = items([...positions].sort((a,b)=>b.pct-a.pct).slice(0,5));
-  document.getElementById('rank-bot').innerHTML = items([...positions].sort((a,b)=>a.pct-b.pct).slice(0,5));
+  document.getElementById('rank-top').innerHTML = items([...allPositions].sort((a,b)=>b.pct-a.pct).slice(0,5));
+  document.getElementById('rank-bot').innerHTML = items([...allPositions].sort((a,b)=>a.pct-b.pct).slice(0,5));
 }
 
 const CRIPTO_DISPLAY_NAMES = {
@@ -1040,20 +1027,18 @@ const CRIPTO_DISPLAY_NAMES = {
 function renderAssetSummary() {
   const cedearCount = allPositions.length;
   const bonoSoberano = 1;      // AO27
-  const bonoCorporativo = 1;   // SNEBO
   const accionNYSE = 1;        // XOM
-  const fciCount = 3;          // Fondos Balanz
+  const fciCount = 1;          // Fondos Balanz (Dólar Corto Plazo)
   const criptoCount = CRIPTO_HOLDINGS.length;
-  const total = cedearCount + bonoSoberano + bonoCorporativo + accionNYSE + fciCount + criptoCount;
+  const total = cedearCount + bonoSoberano + accionNYSE + fciCount + criptoCount;
 
   const cedearNames = allPositions.length ? allPositions.map(p => p.symbol).join(', ') : 'cargando…';
   const criptoNames = CRIPTO_HOLDINGS.map(h => CRIPTO_DISPLAY_NAMES[h.id] || h.id).join(', ');
-  const fciNames = 'Balanz: Corporativo, Money Market USD, Dólar Corto Plazo';
+  const fciNames = 'Balanz: Dólar Corto Plazo';
 
   const chips = [
     { label: 'CEDEARs/ETFs', val: cedearCount, detail: cedearNames },
     { label: 'bono soberano', val: bonoSoberano, detail: 'AO27 (bono soberano argentino en dólares, venc. 2027)' },
-    { label: 'bono corporativo', val: bonoCorporativo, detail: 'SNEBO (San Miguel, Obligación Negociable 2029)' },
     { label: 'acción NYSE', val: accionNYSE, detail: 'XOM (ExxonMobil)' },
     { label: 'FCI', val: fciCount, detail: fciNames },
     { label: 'criptomonedas', val: criptoCount, detail: criptoNames },
